@@ -1,4 +1,4 @@
-import { motion, useDragControls, useMotionValue, useTransform, AnimatePresence } from 'framer-motion';
+import { motion, useDragControls, useMotionValue } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { GripHorizontal } from 'lucide-react';
 import CategoryFilter from './CategoryFilter';
@@ -77,15 +77,13 @@ const BottomSheet = () => {
 
       {/* Food Feed */}
       <div className="flex-1 overflow-y-auto px-5 pb-8 space-y-3">
-        <AnimatePresence mode="popLayout">
-          {filteredRestaurants.map((restaurant, index) => (
-            <FoodCard 
-              key={restaurant.id} 
-              restaurant={restaurant} 
-              index={index}
-            />
-          ))}
-        </AnimatePresence>
+        {filteredRestaurants.map((restaurant, index) => (
+          <FoodCard 
+            key={restaurant.id} 
+            restaurant={restaurant} 
+            index={index}
+          />
+        ))}
       </div>
     </motion.div>
   );
