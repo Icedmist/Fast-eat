@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { Star, MapPin } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import type { Restaurant } from '@/data/restaurants';
 
 interface FoodCardProps {
@@ -8,6 +9,12 @@ interface FoodCardProps {
 }
 
 const FoodCard = ({ restaurant, index }: FoodCardProps) => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/restaurant/${restaurant.id}`);
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -17,6 +24,7 @@ const FoodCard = ({ restaurant, index }: FoodCardProps) => {
         delay: index * 0.1,
         ease: [0.25, 0.46, 0.45, 0.94],
       }}
+      onClick={handleClick}
       className="flex gap-4 p-4 bg-card rounded-2xl shadow-card hover:shadow-elevated transition-shadow cursor-pointer group"
     >
       {/* Image */}
