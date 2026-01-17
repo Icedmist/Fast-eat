@@ -1,79 +1,87 @@
-import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
-import { DivIcon } from 'leaflet';
+import { useEffect, useRef } from 'react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import { restaurants } from '@/data/restaurants';
-import { useEffect } from 'react';
 
-// Custom marker icon
-const createCustomIcon = () => {
-  return new DivIcon({
-    html: `
-      <div style="
-        width: 32px;
-        height: 32px;
-        background: hsl(15 80% 55%);
-        border-radius: 50%;
-        border: 3px solid white;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      ">
-        <div style="
-          width: 8px;
-          height: 8px;
-          background: white;
-          border-radius: 50%;
-        "></div>
-      </div>
-    `,
-    className: 'custom-div-icon',
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
-  });
-};
+const RestaurantMap = () => {
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
 
-// Map center adjuster component
-const MapCenterAdjuster = () => {
-  const map = useMap();
-  
   useEffect(() => {
-    // Slightly offset center to account for bottom sheet
+    if (!mapRef.current || mapInstanceRef.current) return;
+
+    // Initialize map
+    const map = L.map(mapRef.current, {
+      center: [40.7128, -74.006],
+      zoom: 15,
+      zoomControl: false,
+      attributionControl: false,
+    });
+
+    mapInstanceRef.current = map;
+
+    // Add tile layer
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+      attribution: '&copy; OpenStreetMap',
+    }).addTo(map);
+
+    // Create custom icon
+    const createCustomIcon = () => {
+      return L.divIcon({
+        html: `
+          <div style="
+            width: 32px;
+            height: 32px;
+            background: hsl(15 80% 55%);
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          ">
+            <div style="
+              width: 8px;
+              height: 8px;
+              background: white;
+              border-radius: 50%;
+            "></div>
+          </div>
+        `,
+        className: 'custom-div-icon',
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+      });
+    };
+
+    // Add markers
+    restaurants.forEach((restaurant) => {
+      L.marker([restaurant.lat, restaurant.lng], {
+        icon: createCustomIcon(),
+      }).addTo(map);
+    });
+
+    // Adjust center for bottom sheet
     setTimeout(() => {
       const center = map.getCenter();
       map.setView([center.lat + 0.002, center.lng], map.getZoom());
       map.invalidateSize();
     }, 100);
-  }, [map]);
 
-  return null;
-};
-
-const RestaurantMap = () => {
-  const center: [number, number] = [40.7128, -74.006];
+    return () => {
+      if (mapInstanceRef.current) {
+        mapInstanceRef.current.remove();
+        mapInstanceRef.current = null;
+      }
+    };
+  }, []);
 
   return (
-    <div className="w-full h-full" style={{ minHeight: '100%' }}>
-      <MapContainer
-        center={center}
-        zoom={15}
-        style={{ width: '100%', height: '100%', minHeight: '100vh' }}
-        zoomControl={false}
-        attributionControl={false}
-      >
-        <TileLayer
-          url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-        />
-        <MapCenterAdjuster />
-        {restaurants.map((restaurant) => (
-          <Marker
-            key={restaurant.id}
-            position={[restaurant.lat, restaurant.lng]}
-            icon={createCustomIcon()}
-          />
-        ))}
-      </MapContainer>
-    </div>
+    <div 
+      ref={mapRef} 
+      className="w-full h-full" 
+      style={{ minHeight: '100vh' }}
+    />
   );
 };
 
