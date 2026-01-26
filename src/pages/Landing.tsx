@@ -91,7 +91,7 @@ const Landing = () => {
 
             {/* CTA Button */}
             <div className="flex items-center gap-4">
-              <span className="hidden lg:block text-sm font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors" onClick={() => navigate('/signup')}>Sign In</span>
+              <span className="hidden lg:block text-sm font-medium text-muted-foreground cursor-pointer hover:text-foreground transition-colors" onClick={() => navigate('/signin')}>Sign In</span>
               <Button
                 onClick={() => navigate('/signup')}
                 className="rounded-full bg-primary hover:bg-primary/90 text-white px-6 shadow-md hover:shadow-xl transition-all"

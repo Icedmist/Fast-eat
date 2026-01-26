@@ -103,17 +103,14 @@ const SignUp = () => {
         {/* Progress Indicator */}
         <div className="flex justify-center mb-12">
           <div className="flex items-center gap-4">
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-medium transition-colors ${
-              step === 'role' ? 'bg-primary text-primary-foreground' : 'bg-primary text-primary-foreground'
-            }`}>
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-medium transition-colors ${step === 'role' ? 'bg-primary text-primary-foreground' : 'bg-primary text-primary-foreground'
+              }`}>
               {step === 'details' ? <Check className="w-5 h-5" /> : '1'}
             </div>
-            <div className={`w-16 h-1 rounded-full transition-colors ${
-              step === 'details' ? 'bg-primary' : 'bg-muted'
-            }`} />
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-medium transition-colors ${
-              step === 'details' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-            }`}>
+            <div className={`w-16 h-1 rounded-full transition-colors ${step === 'details' ? 'bg-primary' : 'bg-muted'
+              }`} />
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-medium transition-colors ${step === 'details' ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+              }`}>
               2
             </div>
           </div>
@@ -135,11 +132,10 @@ const SignUp = () => {
                     whileHover={{ y: -4 }}
                     whileTap={{ scale: 0.98 }}
                     onClick={() => handleRoleSelect(role.id)}
-                    className={`relative cursor-pointer p-6 rounded-3xl border-2 transition-all ${
-                      selectedRole === role.id
-                        ? 'border-primary bg-primary/5 shadow-elevated'
-                        : 'border-border bg-card hover:border-primary/30 shadow-card'
-                    }`}
+                    className={`relative cursor-pointer p-6 rounded-3xl border-2 transition-all ${selectedRole === role.id
+                      ? 'border-primary bg-primary/5 shadow-elevated'
+                      : 'border-border bg-card hover:border-primary/30 shadow-card'
+                      }`}
                   >
                     {/* Selection indicator */}
                     {selectedRole === role.id && (
@@ -278,6 +274,16 @@ const SignUp = () => {
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Back
                   </Button>
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => navigate('/signin', { state: { role: selectedRole } })}
+                    className="px-6 py-6 border-2 font-semibold text-primary hover:text-primary/80 hover:bg-primary/5"
+                  >
+                    Log In
+                  </Button>
+
                   <Button
                     type="submit"
                     className="flex-1 py-6 bg-primary hover:bg-primary/90 text-primary-foreground"
