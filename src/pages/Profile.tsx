@@ -64,14 +64,14 @@ const Profile = () => {
             case 'profile':
                 return (
                     <div className="space-y-6">
-                        <div className="flex flex-col items-center gap-4 py-4">
-                            <div className="w-24 h-24 rounded-2xl bg-primary/10 flex items-center justify-center text-primary relative">
-                                <User className="w-12 h-12" />
-                                <button className="absolute -bottom-1 -right-1 w-8 h-8 bg-primary text-white rounded-lg flex items-center justify-center shadow-lg active:scale-90 transition-transform">
+                        <div className="flex flex-col items-center gap-3 sm:gap-4 py-2 sm:py-4">
+                            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-primary/10 flex items-center justify-center text-primary relative">
+                                <User className="w-10 h-10 sm:w-12 sm:h-12" />
+                                <button className="absolute -bottom-1 -right-1 w-7 h-7 sm:w-8 sm:h-8 bg-primary text-white rounded-lg flex items-center justify-center shadow-lg active:scale-90 transition-transform">
                                     <Plus className="w-4 h-4" />
                                 </button>
                             </div>
-                            <p className="text-xs text-muted-foreground font-medium">Change Profile Photo</p>
+                            <p className="text-[10px] sm:text-xs text-muted-foreground font-medium uppercase tracking-wider">Change Profile Photo</p>
                         </div>
                         <div className="space-y-4">
                             <div className="space-y-1.5">
@@ -87,7 +87,7 @@ const Profile = () => {
                                 <Input defaultValue="+234 801 234 5678" type="tel" className="rounded-xl h-12 border-border/50 bg-secondary/30" />
                             </div>
                         </div>
-                        <Button className="w-full h-12 rounded-xl font-bold mt-4 shadow-md bg-primary hover:bg-primary/90">Save Changes</Button>
+                        <Button className="w-full h-12 sm:h-14 rounded-xl font-bold mt-2 sm:mt-4 shadow-md bg-primary hover:bg-primary/90 text-sm sm:text-base">Save Changes</Button>
                     </div>
                 );
             case 'addresses':
@@ -137,9 +137,9 @@ const Profile = () => {
                                     </div>
                                 </div>
                             </div>
-                            <Button variant="outline" className="w-full h-14 rounded-2xl border-dashed border-2 flex items-center justify-center gap-2 text-muted-foreground hover:text-primary transition-colors">
-                                <Plus className="w-5 h-5" />
-                                <span className="font-bold text-sm">Add New Card</span>
+                            <Button variant="outline" className="w-full h-12 sm:h-14 rounded-2xl border-dashed border-2 flex items-center justify-center gap-2 text-muted-foreground hover:text-primary transition-colors text-xs sm:text-sm">
+                                <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
+                                <span className="font-bold">Add New Card</span>
                             </Button>
                         </div>
                     </div>
@@ -222,7 +222,7 @@ const Profile = () => {
             <motion.header
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="px-5 pt-12 pb-6 bg-white shadow-sm sticky top-0 z-40 flex items-center justify-between"
+                className="px-5 pt-8 sm:pt-12 pb-5 bg-white shadow-sm sticky top-0 z-40 flex items-center justify-between"
             >
                 <div className="flex items-center gap-4">
                     <button
@@ -243,15 +243,15 @@ const Profile = () => {
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    className="bg-card rounded-3xl p-6 shadow-card flex items-center gap-5 border border-border/50"
+                    className="bg-card rounded-3xl p-4 sm:p-6 shadow-card flex items-center gap-4 sm:gap-5 border border-border/50"
                 >
-                    <div className="w-20 h-20 rounded-2xl bg-primary/10 flex items-center justify-center text-primary relative">
-                        <User className="w-10 h-10" />
-                        <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-green-500 border-2 border-white rounded-full" />
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-primary/10 flex items-center justify-center text-primary relative shrink-0">
+                        <User className="w-8 h-8 sm:w-10 sm:h-10" />
+                        <div className="absolute -bottom-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-green-500 border-2 border-white rounded-full" />
                     </div>
-                    <div className="flex-1">
-                        <h2 className="text-xl font-bold font-serif underline decoration-primary/30">Abdul Maaji</h2>
-                        <p className="text-sm text-muted-foreground">abdul.maaji@taste.com</p>
+                    <div className="flex-1 min-w-0">
+                        <h2 className="text-lg sm:text-xl font-bold font-serif underline decoration-primary/30 truncate">Abdul Maaji</h2>
+                        <p className="text-xs sm:text-sm text-muted-foreground truncate">abdul.maaji@taste.com</p>
                         <div className="flex items-center gap-2 mt-2">
                             <span className="text-[10px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-bold tracking-wider uppercase">
                                 Premium Member
@@ -266,7 +266,7 @@ const Profile = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => setActiveTab('profile')}
-                        className="p-3 h-auto rounded-xl hover:bg-secondary text-primary font-bold text-xs"
+                        className="p-2 sm:p-3 h-auto rounded-xl hover:bg-secondary text-primary font-bold text-[10px] sm:text-xs"
                     >
                         Edit
                     </Button>
@@ -283,10 +283,10 @@ const Profile = () => {
                                 animate={{ opacity: 1, x: 0 }}
                                 transition={{ delay: idx * 0.05 }}
                                 onClick={() => setActiveTab(item.id)}
-                                className="w-full flex items-center gap-4 p-4 hover:bg-secondary/50 transition-colors border-b last:border-0 border-border/30 group"
+                                className="w-full flex items-center gap-3 sm:gap-4 p-3.5 sm:p-4 hover:bg-secondary/50 transition-colors border-b last:border-0 border-border/30 group"
                             >
-                                <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center text-white shadow-sm transition-transform group-active:scale-90`}>
-                                    <item.icon className="w-5 h-5" />
+                                <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl ${item.color} flex items-center justify-center text-white shadow-sm transition-transform group-active:scale-90 shrink-0`}>
+                                    <item.icon className="w-4 h-4 sm:w-5 sm:h-5" />
                                 </div>
                                 <div className="flex-1 text-left">
                                     <p className="font-bold text-sm text-foreground">{item.label}</p>
@@ -311,18 +311,18 @@ const Profile = () => {
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.3 + idx * 0.1 }}
-                                className="bg-card rounded-2xl p-4 shadow-card border border-border/50 flex gap-4 hover:border-primary/30 transition-colors group cursor-pointer"
+                                className="bg-card rounded-2xl p-3 sm:p-4 shadow-card border border-border/50 flex gap-3 sm:gap-4 hover:border-primary/30 transition-colors group cursor-pointer"
                             >
-                                <div className="w-16 h-16 rounded-xl overflow-hidden shrink-0 bg-secondary">
+                                <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl overflow-hidden shrink-0 bg-secondary">
                                     <img src={order.image} alt={order.restaurant} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex justify-between items-start">
-                                        <h4 className="font-bold text-sm text-foreground truncate">{order.restaurant}</h4>
-                                        <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full">{order.status}</span>
+                                        <h4 className="font-bold text-xs sm:text-sm text-foreground truncate">{order.restaurant}</h4>
+                                        <span className="text-[9px] sm:text-[10px] font-bold text-green-600 bg-green-50 px-1.5 sm:px-2 py-0.5 rounded-full">{order.status}</span>
                                     </div>
-                                    <p className="text-[10px] text-muted-foreground mt-0.5">{order.date} • {order.id}</p>
-                                    <p className="text-xs text-foreground mt-1 line-clamp-1 italic text-muted-foreground">"{order.items}"</p>
+                                    <p className="text-[9px] sm:text-[10px] text-muted-foreground mt-0.5">{order.date} • {order.id}</p>
+                                    <p className="text-[10px] sm:text-xs text-foreground mt-1 line-clamp-1 italic text-muted-foreground">"{order.items}"</p>
                                     <div className="flex items-center justify-between mt-2">
                                         <span className="text-sm font-bold text-primary">{order.total}</span>
                                         <button className="text-[10px] font-bold text-primary px-3 py-1 rounded-lg border border-primary/20 hover:bg-primary/5">Reorder</button>

@@ -223,7 +223,7 @@ const RestaurantDetail = () => {
   return (
     <div className="min-h-screen bg-background pb-24 relative">
       {/* Hero Image */}
-      <div className="relative h-72 overflow-hidden">
+      <div className="relative h-56 sm:h-72 overflow-hidden">
         <img
           src={restaurant.image}
           alt={restaurant.name}
@@ -236,22 +236,22 @@ const RestaurantDetail = () => {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           onClick={() => navigate(-1)}
-          className="absolute top-12 left-5 p-3 rounded-full glass shadow-soft z-20"
+          className="absolute top-8 sm:top-12 left-5 p-2.5 sm:p-3 rounded-full glass shadow-soft z-20"
         >
-          <ArrowLeft className="w-5 h-5 text-foreground" />
+          <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />
         </motion.button>
 
         {/* Action Buttons */}
-        <div className="absolute top-12 right-5 md:right-[370px] flex gap-3 z-20">
+        <div className="absolute top-8 sm:top-12 right-5 md:right-[370px] flex gap-2 sm:gap-3 z-20">
           <div className="relative">
             <motion.button
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.1 }}
               onClick={() => setShowInfo(!showInfo)}
-              className="p-3 rounded-full glass shadow-soft hover:bg-white/80 transition-colors"
+              className="p-2.5 sm:p-3 rounded-full glass shadow-soft hover:bg-white/80 transition-colors"
             >
-              <Info className="w-5 h-5 text-foreground" />
+              <Info className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />
             </motion.button>
 
             {/* Info Popover */}
@@ -294,11 +294,11 @@ const RestaurantDetail = () => {
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
             onClick={toggleFavorite}
-            className={`p-3 rounded-full glass shadow-soft transition-colors ${isFavorite ? 'bg-red-50' : ''
+            className={`p-2.5 sm:p-3 rounded-full glass shadow-soft transition-colors ${isFavorite ? 'bg-red-50' : ''
               }`}
           >
             <Heart
-              className={`w-5 h-5 transition-colors ${isFavorite ? 'fill-red-500 text-red-500' : 'text-foreground'
+              className={`w-4 h-4 sm:w-5 sm:h-5 transition-colors ${isFavorite ? 'fill-red-500 text-red-500' : 'text-foreground'
                 }`}
             />
           </motion.button>
@@ -316,16 +316,16 @@ const RestaurantDetail = () => {
           >
             {/* Info Card */}
             <div className="bg-card rounded-2xl p-6 shadow-card">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <h1 className="text-2xl font-bold text-foreground font-serif">{restaurant.name}</h1>
-                  <span className="text-xs px-2.5 py-1 rounded-full bg-secondary text-muted-foreground mt-2 inline-block">
+              <div className="flex items-start justify-between mb-2 sm:mb-3">
+                <div className="min-w-0">
+                  <h1 className="text-xl sm:text-2xl font-bold text-foreground font-serif truncate">{restaurant.name}</h1>
+                  <span className="text-[10px] sm:text-xs px-2 py-0.5 sm:py-1 rounded-full bg-secondary text-muted-foreground mt-1.5 sm:mt-2 inline-block">
                     Verified Vendor
                   </span>
                 </div>
               </div>
 
-              <p className="text-muted-foreground mb-4">
+              <p className="text-sm sm:text-base text-muted-foreground mb-4 line-clamp-3 sm:line-clamp-none">
                 {restaurant.bio}
               </p>
 
@@ -341,7 +341,7 @@ const RestaurantDetail = () => {
                 </div>
                 <div className="flex items-center gap-1.5 text-muted-foreground">
                   <Clock className="w-4 h-4" />
-                  <span>25-35 min</span>
+                  <span className="whitespace-nowrap">25-35 min</span>
                 </div>
               </div>
             </div>
@@ -357,17 +357,17 @@ const RestaurantDetail = () => {
                       initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: 0.1 + index * 0.05 }}
-                      className="bg-card rounded-xl p-3 shadow-card hover:shadow-md transition-shadow"
+                      className="bg-card rounded-xl p-2.5 sm:p-3 shadow-card hover:shadow-md transition-shadow"
                     >
-                      <div className="flex items-center gap-4">
-                        <div className="w-24 h-24 rounded-lg overflow-hidden shrink-0 bg-secondary">
+                      <div className="flex items-center gap-3 sm:gap-4">
+                        <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg overflow-hidden shrink-0 bg-secondary">
                           <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1 flex justify-between items-center">
-                          <div className="flex-1 min-w-0 pr-4">
-                            <h3 className="font-semibold text-foreground truncate">{item.name}</h3>
-                            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{item.description}</p>
-                            <span className="font-bold text-primary mt-2 block text-md">₦{item.price.toLocaleString()}</span>
+                          <div className="flex-1 min-w-0 pr-2 sm:pr-4">
+                            <h3 className="font-semibold text-sm sm:text-base text-foreground truncate">{item.name}</h3>
+                            <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1 line-clamp-2">{item.description}</p>
+                            <span className="font-bold text-primary mt-1.5 sm:mt-2 block text-sm sm:text-md">₦{item.price.toLocaleString()}</span>
                           </div>
                           <Button
                             size="sm"

@@ -15,6 +15,7 @@ export type FilterState = {
 const Discover = () => {
   const navigate = useNavigate();
   const [isListFullScreen, setIsListFullScreen] = useState(false);
+  const [isMapFullScreen, setIsMapFullScreen] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     category: 'All',
     topRated: false,
@@ -69,35 +70,38 @@ const Discover = () => {
         className="absolute top-0 left-0 right-0 z-[60] px-5 pt-12 pb-4 pointer-events-none"
       >
         <div className="flex items-center justify-between pointer-events-auto">
-          <div>
+          <div className="opacity-100 transition-opacity">
             <p className="text-sm text-muted-foreground font-sans">Exploring</p>
             <h1 className="text-lg font-serif font-semibold text-foreground">
               Gombe, Nigeria
             </h1>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             <button
-              onClick={() => setIsListFullScreen(!isListFullScreen)}
-              className="p-3 rounded-full glass shadow-soft bg-white/80"
+              onClick={() => {
+                setIsMapFullScreen(!isMapFullScreen);
+                if (isListFullScreen) setIsListFullScreen(false);
+              }}
+              className="p-2.5 sm:p-3 rounded-full glass shadow-soft bg-white/80"
             >
-              {isListFullScreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+              {isMapFullScreen ? <Minimize2 className="w-4 h-4 sm:w-5 sm:h-5" /> : <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5" />}
             </button>
             <button
               onClick={() => navigate('/chat')}
-              className="p-3 rounded-full glass shadow-soft bg-white/80 relative"
+              className="p-2.5 sm:p-3 rounded-full glass shadow-soft bg-white/80 relative"
             >
-              <MessageCircle className="w-5 h-5 text-foreground" />
-              <div className="absolute top-2.5 right-2.5 w-2 h-2 bg-green-500 rounded-full border border-white" />
+              <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />
+              <div className="absolute top-2.5 right-2.5 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full border border-white" />
             </button>
-            <button className="p-3 rounded-full glass shadow-soft bg-white/80 relative">
+            <button className="p-2.5 sm:p-3 rounded-full glass shadow-soft bg-white/80 relative">
               <Bell className="w-5 h-5 text-foreground" />
               <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-primary rounded-full" />
             </button>
             <button
               onClick={() => navigate('/profile')}
-              className="p-3 rounded-full glass shadow-soft bg-white/80"
+              className="p-2.5 sm:p-3 rounded-full glass shadow-soft bg-white/80"
             >
-              <User className="w-5 h-5 text-foreground" />
+              <User className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />
             </button>
           </div>
         </div>
@@ -114,13 +118,15 @@ const Discover = () => {
         </div>
       )}
 
-      {/* Bottom Sheet Layer - Always rendered, controls its own height based on isFullScreen */}
-      <BottomSheet
-        items={filteredFoodItems}
-        filters={filters}
-        onFilterChange={setFilters}
-        isFullScreen={isListFullScreen}
-      />
+      {/* Bottom Sheet Layer - Always rendered, unless map is full screen */}
+      {!isMapFullScreen && (
+        <BottomSheet
+          items={filteredFoodItems}
+          filters={filters}
+          onFilterChange={setFilters}
+          isFullScreen={isListFullScreen}
+        />
+      )}
     </div>
   );
 };
