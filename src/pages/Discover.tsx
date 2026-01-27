@@ -94,7 +94,7 @@ const Discover = () => {
               <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-primary rounded-full" />
             </button>
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate('/profile')}
               className="p-3 rounded-full glass shadow-soft bg-white/80"
             >
               <User className="w-5 h-5 text-foreground" />
