@@ -110,7 +110,7 @@ const RestaurantMap = ({ restaurants, isFullScreen, onExitFullScreen }: Restaura
         .bindPopup(`
           <div class="p-1 text-center min-w-[140px] font-sans">
               <h3 class="font-bold text-sm mb-0.5 text-foreground leading-tight">${restaurant.name}</h3>
-              <span class="text-xs text-muted-foreground uppercase tracking-wide block mb-2">${restaurant.category}</span>
+              <span class="text-xs text-muted-foreground uppercase tracking-wide block mb-2">${restaurant.tags[0] || 'Vendor'}</span>
               <button 
                 onclick="window.handleNavigateRestaurant('${restaurant.id}')"
                 class="inline-flex items-center justify-center w-full h-8 px-3 text-xs font-medium text-white bg-[#E67E22] hover:bg-[#D35400] rounded-full shadow-sm transition-colors cursor-pointer"

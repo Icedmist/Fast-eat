@@ -7,50 +7,66 @@ import { useNavigate } from 'react-router-dom';
 import { restaurants, type Category } from '@/data/restaurants';
 
 export type FilterState = {
-  category: Category;
+  category: Category | 'All';
   topRated: boolean;
   masa: boolean;
 };
 
 const Discover = () => {
   const navigate = useNavigate();
-  const [isMapFullScreen, setIsMapFullScreen] = useState(false);
+  const [isListFullScreen, setIsListFullScreen] = useState(false);
   const [filters, setFilters] = useState<FilterState>({
     category: 'All',
     topRated: false,
     masa: false,
   });
 
-  // Filter Logic
-  const filteredRestaurants = restaurants.filter((r) => {
+  // Flatten all menu items with vendor info for the Feed
+  const allFoodItems = restaurants.flatMap(vendor =>
+    vendor.menu.map(item => ({
+      ...item,
+      vendorId: vendor.id,
+      vendorName: vendor.name,
+      vendorDistance: vendor.distance,
+      vendorRating: vendor.rating
+    }))
+  );
+
+  // Filter Logic for Food Items
+  const filteredFoodItems = allFoodItems.filter((item) => {
     // 1. Category Filter
-    if (filters.category !== 'All' && r.category !== filters.category) return false;
+    if (filters.category !== 'All' && item.category !== filters.category) return false;
 
-    // 2. Top Rated Filter (> 4.7)
-    if (filters.topRated && r.rating <= 4.7) return false;
+    // 2. Top Rated Filter (> 4.5) - using item rating or vendor rating fallback
+    const rating = item.rating || 4.5;
+    if (filters.topRated && rating < 4.5) return false;
 
-    // 3. Masa Filter (checks tags)
-    if (filters.masa && !r.tags?.includes('Masa')) return false;
+    // 3. Masa Filter (checks if item name or description contains Masa, or vendor tag)
+    if (filters.masa) {
+      const isMasaItem = item.name.toLowerCase().includes('masa') || item.description.toLowerCase().includes('masa');
+      // Also check if vendor is a Masa spot
+      const vendor = restaurants.find(r => r.id === item.vendorId);
+      const isMasaVendor = vendor?.tags.includes('Masa');
+
+      if (!isMasaItem && !isMasaVendor) return false;
+    }
 
     return true;
   });
 
-  // Handler for list expansion (hides map)
-  const handleListExpand = (expanded: boolean) => {
-    // If list expands fully, map is effectively hidden/backgrounded
-    // We can use isMapFullScreen to mean "Map is the PRIMARY view"
-    // So if list expands, map is NOT full screen (it's covered)
-    // But we might need a separate state for "Map Visibility" if we want to fade it out
-  };
+  // Filter Logic for Map (Vendors)
+  // Show vendors that have at least one item in the filtered list
+  const activeVendorIds = new Set(filteredFoodItems.map(i => i.vendorId));
+  const filteredRestaurants = restaurants.filter(r => activeVendorIds.has(r.id));
 
   return (
     <div className="relative h-[100dvh] w-full overflow-hidden bg-background">
-      {/* Header - Only visible when map is NOT full screen or we want controls overlay */}
+      {/* Header - Always visible, higher z-index to stay above fullscreen list */}
       <motion.header
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="absolute top-0 left-0 right-0 z-40 px-5 pt-12 pb-4 pointer-events-none"
+        className="absolute top-0 left-0 right-0 z-[60] px-5 pt-12 pb-4 pointer-events-none"
       >
         <div className="flex items-center justify-between pointer-events-auto">
           <div>
@@ -61,10 +77,10 @@ const Discover = () => {
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setIsMapFullScreen(!isMapFullScreen)}
+              onClick={() => setIsListFullScreen(!isListFullScreen)}
               className="p-3 rounded-full glass shadow-soft bg-white/80"
             >
-              {isMapFullScreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+              {isListFullScreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
             </button>
             <button
               onClick={() => navigate('/chat')}
@@ -87,25 +103,24 @@ const Discover = () => {
         </div>
       </motion.header>
 
-      {/* Map Layer */}
-      <div className="absolute inset-0 w-full h-full">
-        <RestaurantMap
-          restaurants={filteredRestaurants}
-          isFullScreen={isMapFullScreen}
-          onExitFullScreen={() => setIsMapFullScreen(false)}
-        />
-      </div>
-
-      {/* Bottom Sheet Layer - Hidden when Map is Full Screen */}
-      <AnimatePresence>
-        {!isMapFullScreen && (
-          <BottomSheet
+      {/* Map Layer - Only visible when list is NOT fullscreen */}
+      {!isListFullScreen && (
+        <div className="absolute inset-0 w-full h-full">
+          <RestaurantMap
             restaurants={filteredRestaurants}
-            filters={filters}
-            onFilterChange={setFilters}
+            isFullScreen={false} // Map is never fullscreen in this new logic
+            onExitFullScreen={() => { }}
           />
-        )}
-      </AnimatePresence>
+        </div>
+      )}
+
+      {/* Bottom Sheet Layer - Always rendered, controls its own height based on isFullScreen */}
+      <BottomSheet
+        items={filteredFoodItems}
+        filters={filters}
+        onFilterChange={setFilters}
+        isFullScreen={isListFullScreen}
+      />
     </div>
   );
 };

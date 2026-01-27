@@ -1,18 +1,24 @@
 import { motion } from 'framer-motion';
 import { Star, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import type { Restaurant } from '@/data/restaurants';
+import type { MenuItem } from '@/data/restaurants';
+
+export interface FoodItem extends MenuItem {
+  vendorId: string;
+  vendorName: string;
+  vendorDistance: string;
+}
 
 interface FoodCardProps {
-  restaurant: Restaurant;
+  item: FoodItem; // Changed from restaurant
   index: number;
 }
 
-const FoodCard = ({ restaurant, index }: FoodCardProps) => {
+const FoodCard = ({ item, index }: FoodCardProps) => {
   const navigate = useNavigate();
 
   const handleClick = () => {
-    navigate(`/restaurant/${restaurant.id}`);
+    navigate(`/restaurant/${item.vendorId}`);
   };
 
   return (
@@ -28,10 +34,10 @@ const FoodCard = ({ restaurant, index }: FoodCardProps) => {
       className="flex gap-4 p-4 bg-card rounded-2xl shadow-card hover:shadow-elevated transition-shadow cursor-pointer group"
     >
       {/* Image */}
-      <div className="relative w-24 h-24 flex-shrink-0 overflow-hidden rounded-xl">
+      <div className="relative w-24 h-24 flex-shrink-0 overflow-hidden rounded-xl bg-secondary">
         <img
-          src={restaurant.image}
-          alt={restaurant.name}
+          src={item.image}
+          alt={item.name}
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
         />
       </div>
@@ -41,14 +47,17 @@ const FoodCard = ({ restaurant, index }: FoodCardProps) => {
         <div>
           <div className="flex items-start justify-between gap-2">
             <h3 className="font-semibold text-foreground truncate">
-              {restaurant.name}
+              {item.name}
             </h3>
             <span className="text-sm font-semibold text-primary flex-shrink-0">
-              {restaurant.price}
+              ₦{item.price.toLocaleString()}
             </span>
           </div>
-          <p className="text-sm text-muted-foreground line-clamp-2 mt-1">
-            {restaurant.description}
+          <p className="text-xs font-medium text-muted-foreground mb-1">
+            by {item.vendorName}
+          </p>
+          <p className="text-sm text-muted-foreground line-clamp-2">
+            {item.description}
           </p>
         </div>
 
@@ -56,15 +65,15 @@ const FoodCard = ({ restaurant, index }: FoodCardProps) => {
           <div className="flex items-center gap-1">
             <Star className="w-4 h-4 fill-primary text-primary" />
             <span className="text-sm font-medium text-foreground">
-              {restaurant.rating}
+              {item.rating || 4.5}
             </span>
           </div>
           <div className="flex items-center gap-1 text-muted-foreground">
             <MapPin className="w-3.5 h-3.5" />
-            <span className="text-sm">{restaurant.distance}</span>
+            <span className="text-sm">{item.vendorDistance}</span>
           </div>
           <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">
-            {restaurant.category}
+            {item.category}
           </span>
         </div>
       </div>
