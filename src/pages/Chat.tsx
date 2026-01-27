@@ -57,8 +57,8 @@ const Chat = () => {
             {/* Chat List (Sidebar on Desktop, Full on Mobile if no active chat) */}
             <div className={`w-full md:w-80 bg-card border-r border-border flex flex-col ${activeChatId ? 'hidden md:flex' : 'flex'}`}>
                 <div className="p-4 border-b border-border">
-                    <div className="flex items-center gap-2 mb-4">
-                        <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="md:hidden">
+                    <div className="flex items-center gap-1 mb-4">
+                        <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0">
                             <ArrowLeft className="w-5 h-5" />
                         </Button>
                         <h1 className="text-xl font-bold font-serif">Messages</h1>
@@ -107,25 +107,25 @@ const Chat = () => {
                 ) : (
                     <>
                         {/* Header */}
-                        <div className="p-4 border-b border-border flex items-center justify-between bg-card/50 backdrop-blur-sm z-10">
-                            <div className="flex items-center gap-3">
-                                <Button variant="ghost" size="icon" onClick={() => setActiveChatId(null)} className="md:hidden">
-                                    <ArrowLeft className="w-5 h-5" />
+                        <div className="p-3 sm:p-4 border-b border-border flex items-center justify-between bg-card/50 backdrop-blur-sm z-10">
+                            <div className="flex items-center gap-2 sm:gap-3">
+                                <Button variant="ghost" size="icon" onClick={() => setActiveChatId(null)} className="md:hidden h-8 w-8">
+                                    <ArrowLeft className="w-4 h-4" />
                                 </Button>
-                                <div className="relative">
-                                    <img src={activeChat.avatar} alt={activeChat.name} className="w-10 h-10 rounded-full object-cover" />
+                                <div className="relative shrink-0">
+                                    <img src={activeChat.avatar} alt={activeChat.name} className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover" />
                                 </div>
-                                <div>
-                                    <h2 className="font-bold text-foreground">{activeChat.name}</h2>
-                                    <span className="text-xs text-green-500 font-medium flex items-center gap-1">
+                                <div className="min-w-0">
+                                    <h2 className="font-bold text-sm sm:text-base text-foreground truncate">{activeChat.name}</h2>
+                                    <span className="text-[10px] sm:text-xs text-green-500 font-medium flex items-center gap-1">
                                         {activeChat.online ? 'Online' : 'Offline'}
                                     </span>
                                 </div>
                             </div>
-                            <div className="flex items-center gap-1">
-                                <Button variant="ghost" size="icon"><Phone className="w-5 h-5 text-muted-foreground" /></Button>
-                                <Button variant="ghost" size="icon"><Video className="w-5 h-5 text-muted-foreground" /></Button>
-                                <Button variant="ghost" size="icon"><MoreVertical className="w-5 h-5 text-muted-foreground" /></Button>
+                            <div className="flex items-center gap-0.5 sm:gap-1">
+                                <Button variant="ghost" size="icon" className="h-8 w-8"><Phone className="w-4 h-4 text-muted-foreground" /></Button>
+                                <Button variant="ghost" size="icon" className="h-8 w-8"><Video className="w-4 h-4 text-muted-foreground" /></Button>
+                                <Button variant="ghost" size="icon" className="h-8 w-8"><MoreVertical className="w-4 h-4 text-muted-foreground" /></Button>
                             </div>
                         </div>
 
@@ -168,31 +168,31 @@ const Chat = () => {
                         </div>
 
                         {/* Input Area */}
-                        <div className="p-4 bg-card border-t border-border">
+                        <div className="p-3 sm:p-4 bg-card border-t border-border">
                             <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="icon" className="shrink-0 text-muted-foreground">
-                                    <Image className="w-5 h-5" />
+                                <Button variant="ghost" size="icon" className="shrink-0 text-muted-foreground h-9 w-9">
+                                    <Image className="w-4 h-4 sm:w-5 sm:h-5" />
                                 </Button>
-                                <div className="flex-1 bg-secondary/50 rounded-full flex items-center px-4 py-2 border border-transparent focus-within:border-primary/30 transition-colors">
+                                <div className="flex-1 bg-secondary/50 rounded-full flex items-center px-3 sm:px-4 py-1.5 sm:py-2 border border-transparent focus-within:border-primary/30 transition-colors">
                                     <Input
                                         placeholder="Message..."
-                                        className="border-none bg-transparent h-auto p-0 focus-visible:ring-0 placeholder:text-muted-foreground"
+                                        className="border-none bg-transparent h-auto p-0 focus-visible:ring-0 placeholder:text-muted-foreground text-sm sm:text-base"
                                         value={newMessage}
                                         onChange={(e) => setNewMessage(e.target.value)}
                                         onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                                     />
-                                    <Button variant="ghost" size="icon" className="h-6 w-6 ml-2 text-muted-foreground hover:text-foreground">
+                                    <Button variant="ghost" size="icon" className="h-5 w-5 sm:h-6 sm:w-6 ml-1 sm:ml-2 text-muted-foreground hover:text-foreground">
                                         <Smile className="w-4 h-4" />
                                     </Button>
                                 </div>
                                 {newMessage ? (
-                                    <Button onClick={handleSend} size="icon" className="rounded-full w-10 h-10 shrink-0 bg-primary hover:bg-primary/90 text-white shadow-sm transition-transform active:scale-95">
+                                    <Button onClick={handleSend} size="icon" className="rounded-full w-9 h-9 sm:w-10 sm:h-10 shrink-0 bg-primary hover:bg-primary/90 text-white shadow-sm transition-transform active:scale-95">
                                         <Send className="w-4 h-4 ml-0.5" />
                                     </Button>
                                 ) : (
                                     <Button
                                         size="icon"
-                                        className={`rounded-full w-10 h-10 shrink-0 shadow-sm transition-all ${isRecording ? 'bg-red-500 hover:bg-red-600 text-white scale-110' : 'bg-card hover:bg-secondary text-foreground border border-border'}`}
+                                        className={`rounded-full w-9 h-9 sm:w-10 sm:h-10 shrink-0 shadow-sm transition-all ${isRecording ? 'bg-red-500 hover:bg-red-600 text-white scale-110' : 'bg-card hover:bg-secondary text-foreground border border-border'}`}
                                         onMouseDown={() => setIsRecording(true)}
                                         onMouseUp={() => setIsRecording(false)}
                                         onTouchStart={() => setIsRecording(true)}

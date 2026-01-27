@@ -8,12 +8,12 @@ interface CategoryFilterProps {
 
 const CategoryFilter = ({ selected, onSelect, isTopRated, onToggleTopRated }: CategoryFilterProps & { isTopRated?: boolean; onToggleTopRated?: () => void }) => {
   return (
-    <div className="flex gap-2 overflow-x-auto py-2 px-1 scrollbar-hide">
+    <div className="flex gap-1.5 sm:gap-2 overflow-x-auto py-2 px-1 scrollbar-hide">
       {/* Top Rated Filter (First Item) */}
       {onToggleTopRated && (
         <motion.button
           onClick={onToggleTopRated}
-          className={`relative px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors flex items-center gap-2 ${isTopRated
+          className={`relative px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 sm:gap-2 ${isTopRated
             ? 'bg-[#eab308] text-white border border-[#eab308]'
             : 'text-muted-foreground hover:text-foreground bg-card shadow-card border border-transparent'
             }`}
@@ -41,7 +41,7 @@ const CategoryFilter = ({ selected, onSelect, isTopRated, onToggleTopRated }: Ca
         <motion.button
           key={category}
           onClick={() => onSelect(category)}
-          className={`relative px-5 py-2.5 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${selected === category
+          className={`relative px-4 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-medium whitespace-nowrap transition-colors ${selected === category
             ? 'text-primary-foreground'
             : 'text-muted-foreground hover:text-foreground bg-card shadow-card'
             }`}

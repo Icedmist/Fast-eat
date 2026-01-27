@@ -12,6 +12,7 @@ import RiderDashboard from "./pages/RiderDashboard";
 import RestaurantDetail from "./pages/RestaurantDetail";
 import Chat from "./pages/Chat";
 import Checkout from "./pages/Checkout";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
           <Route path="/chat" element={<Chat />} />
           <Route path="/chat/:id" element={<Chat />} />
           <Route path="/checkout" element={<Checkout />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

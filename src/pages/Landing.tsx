@@ -65,8 +65,8 @@ const Landing = () => {
   return (
     <div className="min-h-screen bg-background texture-linen">
       {/* Navigation Bar */}
-      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 py-4 ${isScrolled ? 'pt-2' : 'pt-6'}`}>
-        <div className={`container mx-auto max-w-5xl rounded-full transition-all duration-500 border relative overflow-hidden ${isScrolled ? 'bg-white/70 backdrop-blur-md border-white/20 shadow-lg py-2 px-8' : 'bg-transparent border-transparent py-4 px-6'}`}>
+      <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-4 sm:px-6 py-4 ${isScrolled ? 'pt-2' : 'pt-6'}`}>
+        <div className={`container mx-auto max-w-5xl rounded-full transition-all duration-500 border relative overflow-hidden ${isScrolled ? 'bg-white/70 backdrop-blur-md border-white/20 shadow-lg py-2 px-6 sm:px-8' : 'bg-transparent border-transparent py-4 px-4 sm:px-6'}`}>
           <div className="flex items-center justify-between">
             {/* Logo */}
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
@@ -129,7 +129,7 @@ const Landing = () => {
               <Sparkles className="w-4 h-4" /> Gombe's Premier Food Marketplace
             </span>
 
-            <h1 className="text-6xl md:text-8xl font-serif font-bold text-foreground leading-[1.1] mb-8 tracking-tight">
+            <h1 className="text-4xl sm:text-6xl md:text-8xl font-serif font-bold text-foreground leading-[1.1] mb-6 sm:mb-8 tracking-tight">
               Taste the <br />
               <span className="text-primary italic">Heart of Gombe</span>
             </h1>
@@ -143,7 +143,7 @@ const Landing = () => {
               <Button
                 size="lg"
                 onClick={() => navigate('/signup')}
-                className="group text-lg px-10 py-8 bg-primary hover:bg-primary/90 text-primary-foreground shadow-elevated rounded-2xl"
+                className="group text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-8 bg-primary hover:bg-primary/90 text-primary-foreground shadow-elevated rounded-2xl"
               >
                 Join the Community
                 <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
@@ -152,7 +152,7 @@ const Landing = () => {
                 size="lg"
                 variant="outline"
                 onClick={() => scrollToSection('trust')}
-                className="text-lg px-10 py-8 border-2 border-primary/20 hover:bg-primary/5 rounded-2xl bg-white/50 backdrop-blur-sm"
+                className="text-base sm:text-lg px-8 sm:px-10 py-6 sm:py-8 border-2 border-primary/20 hover:bg-primary/5 rounded-2xl bg-white/50 backdrop-blur-sm"
               >
                 Explore Food
               </Button>
@@ -249,7 +249,7 @@ const Landing = () => {
       </section>
 
       {/* Section 1: The Circle of Trust */}
-      <section id="trust" className="py-24 relative overflow-hidden">
+      <section id="trust" className="py-16 sm:py-24 relative overflow-hidden">
         <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -333,7 +333,7 @@ const Landing = () => {
       </section>
 
       {/* Section 2: The Step-by-Step Journey */}
-      <section id="journey" className="py-24 bg-secondary/20">
+      <section id="journey" className="py-16 sm:py-24 bg-secondary/20">
         <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -394,7 +394,7 @@ const Landing = () => {
       </section>
 
       {/* Section 3: Impact & Stats */}
-      <section id="impact" className="py-24 border-y border-border/50">
+      <section id="impact" className="py-16 sm:py-24 border-y border-border/50">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
@@ -427,7 +427,7 @@ const Landing = () => {
       </section>
 
       {/* Section 4: Success Stories */}
-      <section id="stories" className="py-24 overflow-hidden">
+      <section id="stories" className="py-16 sm:py-24 overflow-hidden">
         <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

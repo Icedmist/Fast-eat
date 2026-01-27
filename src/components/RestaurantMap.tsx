@@ -41,10 +41,10 @@ const RestaurantMap = ({ restaurants, isFullScreen, onExitFullScreen }: Restaura
   useEffect(() => {
     if (!mapRef.current || mapInstanceRef.current) return;
 
-    // Initialize map
+    // Initialize map with Gombe Nigeria coordinates
     const map = L.map(mapRef.current, {
-      center: [40.7128, -74.006],
-      zoom: 15,
+      center: [10.2897, 11.1673],
+      zoom: 13,
       zoomControl: false,
       attributionControl: false,
     });
@@ -71,6 +71,10 @@ const RestaurantMap = ({ restaurants, isFullScreen, onExitFullScreen }: Restaura
     // Clear existing markers
     markersRef.current.forEach(marker => marker.remove());
     markersRef.current = [];
+
+    if (restaurants.length === 0) return;
+
+    const bounds = L.latLngBounds([]);
 
     const createCustomIcon = (isTopRated: boolean) => {
       const color = isTopRated ? '#eab308' : 'hsl(15 80% 55%)';
@@ -123,8 +127,13 @@ const RestaurantMap = ({ restaurants, isFullScreen, onExitFullScreen }: Restaura
 
       marker.addTo(mapInstanceRef.current!);
       markersRef.current.push(marker);
+      bounds.extend([restaurant.lat, restaurant.lng]);
     });
 
+    // Fit map to markers with padding
+    if (restaurants.length > 0) {
+      mapInstanceRef.current.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+    }
   }, [restaurants]);
 
   return (
