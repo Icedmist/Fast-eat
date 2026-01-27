@@ -10,6 +10,7 @@ import Discover from "./pages/Discover";
 import ChefDashboard from "./pages/ChefDashboard";
 import RiderDashboard from "./pages/RiderDashboard";
 import RestaurantDetail from "./pages/RestaurantDetail";
+import Chat from "./pages/Chat";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -28,6 +29,8 @@ const App = () => (
           <Route path="/chef-dashboard" element={<ChefDashboard />} />
           <Route path="/rider-dashboard" element={<RiderDashboard />} />
           <Route path="/restaurant/:id" element={<RestaurantDetail />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/chat/:id" element={<Chat />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

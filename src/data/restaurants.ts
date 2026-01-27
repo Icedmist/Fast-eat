@@ -9,6 +9,7 @@ export interface Restaurant {
   description: string;
   lat: number;
   lng: number;
+  tags: string[];
 }
 
 export const restaurants: Restaurant[] = [
@@ -23,6 +24,7 @@ export const restaurants: Restaurant[] = [
     description: 'Fresh burrata with black truffle and heirloom tomatoes',
     lat: 40.7128,
     lng: -74.0060,
+    tags: ['Italian', 'Vegetarian', 'Top Rated'],
   },
   {
     id: '2',
@@ -35,6 +37,7 @@ export const restaurants: Restaurant[] = [
     description: 'A5 Wagyu with truffle butter and seasonal vegetables',
     lat: 40.7138,
     lng: -74.0070,
+    tags: ['Steakhouse', 'Luxury', 'Top Rated'],
   },
   {
     id: '3',
@@ -47,6 +50,7 @@ export const restaurants: Restaurant[] = [
     description: 'Japanese-Italian fusion with ceremonial grade matcha',
     lat: 40.7148,
     lng: -74.0050,
+    tags: ['Fusion', 'Sweet'],
   },
   {
     id: '4',
@@ -59,6 +63,7 @@ export const restaurants: Restaurant[] = [
     description: 'Cold brew espresso with premium vodka and vanilla',
     lat: 40.7118,
     lng: -74.0080,
+    tags: ['Cocktail', 'Happy Hour'],
   },
   {
     id: '5',
@@ -71,6 +76,7 @@ export const restaurants: Restaurant[] = [
     description: 'Sashimi-grade tuna with ponzu and microgreens',
     lat: 40.7158,
     lng: -74.0040,
+    tags: ['Japanese', 'Seafood', 'Top Rated'],
   },
   {
     id: '6',
@@ -83,6 +89,7 @@ export const restaurants: Restaurant[] = [
     description: 'Creamy arborio rice with Maine lobster and saffron',
     lat: 40.7168,
     lng: -74.0090,
+    tags: ['Italian', 'Seafood', 'Top Rated'],
   },
   {
     id: '7',
@@ -95,6 +102,7 @@ export const restaurants: Restaurant[] = [
     description: 'Classic Tahitian vanilla with caramelized sugar',
     lat: 40.7108,
     lng: -74.0100,
+    tags: ['French', 'Sweet'],
   },
   {
     id: '8',
@@ -107,6 +115,33 @@ export const restaurants: Restaurant[] = [
     description: 'Bourbon aged in oak with orange and bitters',
     lat: 40.7098,
     lng: -74.0055,
+    tags: ['Cocktail', 'Classic'],
+  },
+  {
+    id: '9',
+    name: 'Special Gombe Masa',
+    category: 'Main',
+    image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80',
+    rating: 4.9,
+    distance: '0.2 mi',
+    price: '$5',
+    description: 'Traditional Gombe Masa served with vegetable soup',
+    lat: 40.7125,
+    lng: -74.0065,
+    tags: ['Masa', 'Local', 'Top Rated'],
+  },
+  {
+    id: '10',
+    name: 'Spicy Masa Skewers',
+    category: 'Appetizers',
+    image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&q=80',
+    rating: 4.7,
+    distance: '0.4 mi',
+    price: '$8',
+    description: 'Mini Masa bites with spicy yaji pepper',
+    lat: 40.7145,
+    lng: -74.0075,
+    tags: ['Masa', 'Spicy'],
   },
 ];
 
