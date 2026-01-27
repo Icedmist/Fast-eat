@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChefHat,
   Clock,
@@ -11,10 +11,15 @@ import {
   Power,
   Check,
   TrendingUp,
-  AlertCircle
+  AlertCircle,
+  Image,
+  Utensils,
+  X,
+  User
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 
 interface MenuItem {
@@ -38,7 +43,17 @@ interface Order {
 const ChefDashboard = () => {
   const navigate = useNavigate();
   const [isOnline, setIsOnline] = useState(true);
-  const [activeTab, setActiveTab] = useState<'orders' | 'menu' | 'analytics' | 'earnings'>('orders');
+  const [activeTab, setActiveTab] = useState<'orders' | 'menu' | 'payouts' | 'profile'>('orders');
+  const [isAddingItem, setIsAddingItem] = useState(false);
+  const [newDish, setNewDish] = useState({
+    name: '',
+    price: '',
+    category: 'Main Course',
+    description: '',
+    calories: '450 kcal',
+    prepTime: '20-25 min',
+    image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80'
+  });
   const [menuItems, setMenuItems] = useState<MenuItem[]>([
     { id: '1', name: 'Masa', price: 500, available: true, orders: 24, image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=200&q=80' },
     { id: '2', name: 'Kilishi (100g)', price: 1500, available: true, orders: 18, image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=200&q=80' },
@@ -235,6 +250,59 @@ const ChefDashboard = () => {
                 ))}
               </div>
             </section>
+
+            {/* Performance Overview (Consolidated Analytics) */}
+            <section className="mt-12 pt-12 border-t border-border space-y-8 pb-8">
+              <h2 className="text-xl font-serif font-bold text-foreground">Performance Overview</h2>
+              <div className="grid md:grid-cols-2 gap-6">
+                <div className="p-6 rounded-3xl bg-card shadow-card border border-border">
+                  <h3 className="font-bold mb-4 flex items-center gap-2">
+                    <TrendingUp className="w-5 h-5 text-blue-500" />
+                    Weekly Growth
+                  </h3>
+                  <div className="h-48 flex items-end gap-2 px-2">
+                    {[40, 65, 45, 90, 55, 75, 85].map((h, i) => (
+                      <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                        <div
+                          className={`w-full rounded-t-lg transition-all duration-500 ${i === 3 ? 'bg-primary' : 'bg-primary/20'}`}
+                          style={{ height: `${h}%` }}
+                        />
+                        <span className="text-[10px] text-muted-foreground">Day {i + 1}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="p-1 rounded-3xl bg-card shadow-card border border-border overflow-hidden">
+                  <div className="p-5">
+                    <h3 className="font-bold mb-4 flex items-center gap-2">
+                      <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
+                      Top Rated Dishes
+                    </h3>
+                    <div className="space-y-3">
+                      {[
+                        { name: 'Masa Special', rating: 4.9, count: 128 },
+                        { name: 'Kilishi Gold', rating: 4.8, count: 95 },
+                        { name: 'Tuwo King', rating: 4.7, count: 82 },
+                      ].map((dish, i) => (
+                        <div key={i} className="flex items-center justify-between p-3 rounded-2xl bg-secondary/30">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary text-xs">
+                              {i + 1}
+                            </div>
+                            <span className="font-medium text-sm">{dish.name}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 font-bold text-sm">
+                            <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                            {dish.rating}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
           </motion.div>
         )}
 
@@ -249,7 +317,10 @@ const ChefDashboard = () => {
                 <h2 className="text-2xl font-serif font-bold text-foreground">Menu Items</h2>
                 <p className="text-sm text-muted-foreground">Manage your dishes and availability</p>
               </div>
-              <Button className="gap-2 shadow-soft">
+              <Button
+                onClick={() => setIsAddingItem(true)}
+                className="gap-2 shadow-soft"
+              >
                 <Plus className="w-4 h-4" />
                 Add Item
               </Button>
@@ -296,66 +367,235 @@ const ChefDashboard = () => {
                 </div>
               ))}
             </div>
+
+            {/* Add Item Modal Overlay */}
+            <AnimatePresence>
+              {isAddingItem && (
+                <>
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    onClick={() => setIsAddingItem(false)}
+                    className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]"
+                  />
+                  <motion.div
+                    initial={{ y: '100%' }}
+                    animate={{ y: 0 }}
+                    exit={{ y: '100%' }}
+                    transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                    className="fixed inset-x-0 bottom-0 max-h-[90vh] bg-card rounded-t-[2.5rem] shadow-elevated z-[101] overflow-y-auto px-6 pt-8 pb-12"
+                  >
+                    <div className="max-w-xl mx-auto">
+                      <div className="flex items-center justify-between mb-8">
+                        <div>
+                          <h2 className="text-2xl font-serif font-bold">Add New Dish</h2>
+                          <p className="text-sm text-muted-foreground">Fill in the details for your new menu item</p>
+                        </div>
+                        <button
+                          onClick={() => setIsAddingItem(false)}
+                          className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center hover:bg-muted"
+                        >
+                          <X className="w-5 h-5 text-muted-foreground" />
+                        </button>
+                      </div>
+
+                      <div className="space-y-6">
+                        {/* Basic Info */}
+                        <div className="grid gap-6">
+                          <div className="space-y-2">
+                            <label className="text-xs font-bold text-muted-foreground uppercase ml-1">Dish Name</label>
+                            <Input
+                              placeholder="e.g. Traditional Masa"
+                              className="rounded-2xl bg-secondary/30 border-none h-14 px-5 text-lg"
+                              value={newDish.name}
+                              onChange={(e) => setNewDish({ ...newDish, name: e.target.value })}
+                            />
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <label className="text-xs font-bold text-muted-foreground uppercase ml-1">Price (₦)</label>
+                              <Input
+                                type="number"
+                                placeholder="500"
+                                className="rounded-2xl bg-secondary/30 border-none h-14 px-5"
+                                value={newDish.price}
+                                onChange={(e) => setNewDish({ ...newDish, price: e.target.value })}
+                              />
+                            </div>
+                            <div className="space-y-2">
+                              <label className="text-xs font-bold text-muted-foreground uppercase ml-1">Category</label>
+                              <select
+                                className="w-full rounded-2xl bg-secondary/30 border-none h-14 px-5 text-sm appearance-none focus:ring-2 focus:ring-primary/20"
+                                value={newDish.category}
+                                onChange={(e) => setNewDish({ ...newDish, category: e.target.value })}
+                              >
+                                <option>Main Course</option>
+                                <option>Appetizers</option>
+                                <option>Desserts</option>
+                                <option>Beverages</option>
+                                <option>Traditional Specials</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Details */}
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <label className="text-xs font-bold text-muted-foreground uppercase ml-1">Calories</label>
+                            <Input
+                              placeholder="450 kcal"
+                              className="rounded-2xl bg-secondary/30 border-none h-12 px-5"
+                              value={newDish.calories}
+                              onChange={(e) => setNewDish({ ...newDish, calories: e.target.value })}
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <label className="text-xs font-bold text-muted-foreground uppercase ml-1">Prep Time</label>
+                            <Input
+                              placeholder="20-25 min"
+                              className="rounded-2xl bg-secondary/30 border-none h-12 px-5"
+                              value={newDish.prepTime}
+                              onChange={(e) => setNewDish({ ...newDish, prepTime: e.target.value })}
+                            />
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <label className="text-xs font-bold text-muted-foreground uppercase ml-1">Description</label>
+                          <textarea
+                            className="w-full rounded-3xl bg-secondary/30 border-none p-5 min-h-[120px] text-sm focus:ring-2 focus:ring-primary/20 transition-all"
+                            placeholder="Describe how this dish is prepared and what makes it special..."
+                            value={newDish.description}
+                            onChange={(e) => setNewDish({ ...newDish, description: e.target.value })}
+                          />
+                        </div>
+
+                        {/* Image Upload Placeholder */}
+                        <div className="p-8 border-2 border-dashed border-border rounded-3xl bg-secondary/20 flex flex-col items-center justify-center gap-3 group cursor-pointer hover:border-primary/30 transition-colors">
+                          <div className="w-12 h-12 rounded-2xl bg-white/80 shadow-soft flex items-center justify-center group-hover:scale-110 transition-transform">
+                            <Image className="w-6 h-6 text-muted-foreground" />
+                          </div>
+                          <div className="text-center">
+                            <p className="text-sm font-bold">Click to upload photo</p>
+                            <p className="text-xs text-muted-foreground">JPG, PNG up to 5MB</p>
+                          </div>
+                        </div>
+
+                        <div className="flex gap-4 pt-4">
+                          <Button
+                            variant="outline"
+                            className="flex-1 py-7 rounded-2xl font-bold border-2"
+                            onClick={() => setIsAddingItem(false)}
+                          >
+                            Cancel
+                          </Button>
+                          <Button
+                            className="flex-[2] py-7 rounded-2xl font-bold shadow-elevated"
+                            onClick={() => {
+                              if (newDish.name && newDish.price) {
+                                setMenuItems([...menuItems, {
+                                  id: (menuItems.length + 1).toString(),
+                                  name: newDish.name,
+                                  price: parseInt(newDish.price),
+                                  available: true,
+                                  orders: 0,
+                                  image: newDish.image
+                                }]);
+                                setIsAddingItem(false);
+                                setNewDish({
+                                  name: '',
+                                  price: '',
+                                  category: 'Main Course',
+                                  description: '',
+                                  calories: '450 kcal',
+                                  prepTime: '20-25 min',
+                                  image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80'
+                                });
+                              }
+                            }}
+                          >
+                            Save Dish
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
           </motion.div>
         )}
 
-        {activeTab === 'analytics' && (
+        {activeTab === 'profile' && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="space-y-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="max-w-2xl mx-auto"
           >
-            <h2 className="text-2xl font-serif font-bold text-foreground">Analytics</h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div className="p-6 rounded-3xl bg-card shadow-card border border-border">
+            <div className="flex flex-col items-center gap-4 py-8">
+              <div className="w-24 h-24 rounded-2xl bg-primary/10 flex items-center justify-center text-primary relative">
+                <ChefHat className="w-12 h-12" />
+                <button className="absolute -bottom-1 -right-1 w-8 h-8 bg-primary text-white rounded-lg flex items-center justify-center shadow-lg">
+                  <Plus className="w-4 h-4" />
+                </button>
+              </div>
+              <div className="text-center">
+                <h2 className="text-2xl font-serif font-bold text-foreground">Chef Amina B.</h2>
+                <p className="text-muted-foreground font-sans uppercase tracking-[0.2em] text-[10px] font-bold">Executive Chef • Gombe</p>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div className="p-6 rounded-3xl bg-card border border-border shadow-soft">
                 <h3 className="font-bold mb-4 flex items-center gap-2">
-                  <TrendingUp className="w-5 h-5 text-blue-500" />
-                  Monthly Growth
+                  <User className="w-5 h-5 text-primary" />
+                  Personal Information
                 </h3>
-                <div className="h-48 flex items-end gap-2 px-2">
-                  {[40, 65, 45, 90, 55, 75, 85].map((h, i) => (
-                    <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                      <div
-                        className={`w-full rounded-t-lg transition-all duration-500 ${i === 3 ? 'bg-primary' : 'bg-primary/20'}`}
-                        style={{ height: `${h}%` }}
-                      />
-                      <span className="text-[10px] text-muted-foreground">Day {i + 1}</span>
-                    </div>
-                  ))}
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-muted-foreground uppercase ml-1">Full Name</label>
+                    <Input defaultValue="Amina B. Mohammed" className="rounded-2xl bg-secondary/30 border-none h-12 px-4" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-muted-foreground uppercase ml-1">Restaurant Name</label>
+                    <Input defaultValue="Amina's Northern Kitchen" className="rounded-2xl bg-secondary/30 border-none h-12 px-4" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-muted-foreground uppercase ml-1">Professional Bio</label>
+                    <textarea
+                      className="w-full rounded-2xl bg-secondary/30 border-none p-4 min-h-[100px] text-sm focus:ring-2 focus:ring-primary/20 transition-all"
+                      defaultValue="Traditional northern Nigerian cuisine expert with over 12 years of experience. Specializing in authentic Gombe delicacies."
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="p-6 rounded-3xl bg-card shadow-card border border-border">
+              <div className="p-6 rounded-3xl bg-card border border-border shadow-soft">
                 <h3 className="font-bold mb-4 flex items-center gap-2">
-                  <Star className="w-5 h-5 text-amber-500" />
-                  Top Rated Dishes
+                  <Bell className="w-5 h-5 text-primary" />
+                  Contact Details
                 </h3>
                 <div className="space-y-4">
-                  {[
-                    { name: 'Masa Special', rating: 4.9, count: 128 },
-                    { name: 'Kilishi Gold', rating: 4.8, count: 95 },
-                    { name: 'Tuwo King', rating: 4.7, count: 82 },
-                  ].map((dish, i) => (
-                    <div key={i} className="flex items-center justify-between p-3 rounded-2xl bg-secondary/30">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary text-xs">
-                          {i + 1}
-                        </div>
-                        <span className="font-medium">{dish.name}</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                        <span className="font-bold">{dish.rating}</span>
-                      </div>
-                    </div>
-                  ))}
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-muted-foreground uppercase ml-1">Email Address</label>
+                    <Input defaultValue="amina.kitchen@example.com" className="rounded-2xl bg-secondary/30 border-none h-12 px-4" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-muted-foreground uppercase ml-1">Phone Number</label>
+                    <Input defaultValue="+234 803 123 4567" className="rounded-2xl bg-secondary/30 border-none h-12 px-4" />
+                  </div>
                 </div>
               </div>
+
+              <Button className="w-full py-6 rounded-2xl font-bold shadow-elevated">Save Changes</Button>
             </div>
           </motion.div>
         )}
 
-        {activeTab === 'earnings' && (
+        {activeTab === 'payouts' && (
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -419,22 +659,29 @@ const ChefDashboard = () => {
             <span className="text-[10px] font-bold uppercase tracking-tighter">Menu</span>
           </button>
           <button
-            onClick={() => setActiveTab('analytics')}
-            className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'analytics' ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'}`}
+            onClick={() => setActiveTab('analytics' as any)} // Fallback if still named analytics in some parts of logic
+            className="hidden"
           >
-            <div className={`p-2 rounded-xl ${activeTab === 'analytics' ? 'bg-primary/10' : ''}`}>
-              <TrendingUp className="w-5 h-5" />
-            </div>
-            <span className="text-[10px] font-bold uppercase tracking-tighter">Stats</span>
           </button>
+
           <button
-            onClick={() => setActiveTab('earnings')}
-            className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'earnings' ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'}`}
+            onClick={() => setActiveTab('payouts')}
+            className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'payouts' ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'}`}
           >
-            <div className={`p-2 rounded-xl ${activeTab === 'earnings' ? 'bg-primary/10' : ''}`}>
+            <div className={`p-2 rounded-xl ${activeTab === 'payouts' ? 'bg-primary/10' : ''}`}>
               <DollarSign className="w-5 h-5" />
             </div>
             <span className="text-[10px] font-bold uppercase tracking-tighter">Payouts</span>
+          </button>
+
+          <button
+            onClick={() => setActiveTab('profile')}
+            className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'profile' ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            <div className={`p-2 rounded-xl ${activeTab === 'profile' ? 'bg-primary/10' : ''}`}>
+              <User className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] font-bold uppercase tracking-tighter">Profile</span>
           </button>
         </div>
       </nav>
