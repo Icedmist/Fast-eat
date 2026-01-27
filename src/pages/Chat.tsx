@@ -57,8 +57,8 @@ const Chat = () => {
             {/* Chat List (Sidebar on Desktop, Full on Mobile if no active chat) */}
             <div className={`w-full md:w-80 bg-card border-r border-border flex flex-col ${activeChatId ? 'hidden md:flex' : 'flex'}`}>
                 <div className="p-4 border-b border-border">
-                    <div className="flex items-center gap-2 mb-4">
-                        <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="md:hidden">
+                    <div className="flex items-center gap-1 mb-4">
+                        <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="shrink-0">
                             <ArrowLeft className="w-5 h-5" />
                         </Button>
                         <h1 className="text-xl font-bold font-serif">Messages</h1>

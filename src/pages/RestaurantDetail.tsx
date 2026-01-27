@@ -36,6 +36,23 @@ const RestaurantDetail = () => {
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [showInfo, setShowInfo] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(() => {
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    return favorites.includes(id);
+  });
+
+  const toggleFavorite = () => {
+    const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+    let newFavorites;
+    if (favorites.includes(id)) {
+      newFavorites = favorites.filter((favId: string) => favId !== id);
+      setIsFavorite(false);
+    } else {
+      newFavorites = [...favorites, id];
+      setIsFavorite(true);
+    }
+    localStorage.setItem('favorites', JSON.stringify(newFavorites));
+  };
 
   // Redirect if not found
   if (!restaurant) {
@@ -276,9 +293,14 @@ const RestaurantDetail = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3 }}
-            className="p-3 rounded-full glass shadow-soft"
+            onClick={toggleFavorite}
+            className={`p-3 rounded-full glass shadow-soft transition-colors ${isFavorite ? 'bg-red-50' : ''
+              }`}
           >
-            <Heart className="w-5 h-5 text-foreground" />
+            <Heart
+              className={`w-5 h-5 transition-colors ${isFavorite ? 'fill-red-500 text-red-500' : 'text-foreground'
+                }`}
+            />
           </motion.button>
         </div>
       </div>

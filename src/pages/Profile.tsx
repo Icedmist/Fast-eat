@@ -19,9 +19,15 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
+import { restaurants } from '@/data/restaurants';
+
 const Profile = () => {
     const navigate = useNavigate();
     const [activeTab, setActiveTab] = useState<string | null>(null);
+
+    // Load favorites from localStorage
+    const favoriteIds = JSON.parse(localStorage.getItem('favorites') || '[]');
+    const favoriteRestaurants = restaurants.filter(r => favoriteIds.includes(r.id));
 
     const menuItems = [
         { id: 'profile', icon: User, label: 'Edit Profile', subLabel: 'Username, email, bio', color: 'bg-blue-500' },
@@ -136,6 +142,65 @@ const Profile = () => {
                                 <span className="font-bold text-sm">Add New Card</span>
                             </Button>
                         </div>
+                    </div>
+                );
+            case 'favorites':
+                return (
+                    <div className="space-y-4">
+                        {favoriteRestaurants.length === 0 ? (
+                            <div className="py-12 text-center space-y-3">
+                                <div className="w-16 h-16 rounded-full bg-pink-50 flex items-center justify-center mx-auto text-pink-300">
+                                    <Heart className="w-8 h-8" />
+                                </div>
+                                <p className="text-sm text-muted-foreground font-medium">You haven't favorited any chefs yet</p>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => {
+                                        setActiveTab(null);
+                                        navigate('/discover');
+                                    }}
+                                    className="rounded-xl text-xs font-bold border-pink-200 text-pink-600 hover:bg-pink-50"
+                                >
+                                    Explore Chefs
+                                </Button>
+                            </div>
+                        ) : (
+                            <div className="grid gap-4">
+                                {favoriteRestaurants.map((restaurant) => (
+                                    <motion.div
+                                        key={restaurant.id}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        onClick={() => navigate(`/restaurant/${restaurant.id}`)}
+                                        className="bg-card rounded-2xl p-4 shadow-sm border border-border/50 flex gap-4 hover:border-primary/30 transition-colors group cursor-pointer"
+                                    >
+                                        <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-secondary">
+                                            <img src={restaurant.image} alt={restaurant.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex justify-between items-start">
+                                                <h4 className="font-bold text-foreground truncate">{restaurant.name}</h4>
+                                                <div className="flex items-center gap-1 text-xs text-orange-500 font-bold">
+                                                    <Star className="w-3 h-3 fill-orange-500" />
+                                                    <span>{restaurant.rating}</span>
+                                                </div>
+                                            </div>
+                                            <p className="text-xs text-muted-foreground mt-1 line-clamp-1 italic">
+                                                {restaurant.bio}
+                                            </p>
+                                            <div className="flex items-center justify-between mt-3">
+                                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-secondary text-muted-foreground font-medium uppercase tracking-wider">
+                                                    {restaurant.tags[0] || 'Vendor'}
+                                                </span>
+                                                <Button size="sm" variant="ghost" className="h-7 text-xs font-bold text-primary px-0 hover:bg-transparent">
+                                                    View Menu <ChevronRight className="w-3 h-3 ml-1" />
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 );
             default:
