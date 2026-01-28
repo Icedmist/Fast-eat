@@ -15,7 +15,8 @@ import {
   Image,
   Utensils,
   X,
-  User
+  User,
+  ChevronDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -43,17 +44,53 @@ interface Order {
 const ChefDashboard = () => {
   const navigate = useNavigate();
   const [isOnline, setIsOnline] = useState(true);
-  const [activeTab, setActiveTab] = useState<'orders' | 'menu' | 'payouts' | 'profile'>('orders');
+  const [activeTab, setActiveTab] = useState<'orders' | 'menu' | 'payouts' | 'profile'>('menu');
   const [isAddingItem, setIsAddingItem] = useState(false);
   const [newDish, setNewDish] = useState({
     name: '',
     price: '',
     category: 'Main Course',
     description: '',
-    calories: '450 kcal',
-    prepTime: '20-25 min',
     image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80'
   });
+  const [standardPrepTime, setStandardPrepTime] = useState('25');
+  const [timeFilter, setTimeFilter] = useState('7d');
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
+  // Mock activity data datasets
+  const activityData = {
+    '7d': {
+      labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      points: [30, 25, 15, 5, 5], // y values for SVG
+      path: "M0,30 Q15,10 30,25 T60,15 T90,5 L100,5",
+      area: "M0,40 L0,30 Q15,10 30,25 T60,15 T90,5 L100,5 L100,40 Z"
+    },
+    'month': {
+      labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+      points: [35, 20, 45, 15],
+      path: "M0,35 Q25,10 50,45 T100,15",
+      area: "M0,40 L0,35 Q25,10 50,45 T100,15 L100,40 Z"
+    },
+    'q2': {
+      labels: ['Apr', 'May', 'Jun'],
+      points: [40, 15, 5],
+      path: "M0,40 Q50,5 100,5",
+      area: "M0,40 Q50,5 100,5 L100,40 Z"
+    },
+    'year': {
+      labels: ['Jan', 'Mar', 'May', 'Jul', 'Sep', 'Nov'],
+      points: [35, 30, 25, 20, 15, 5],
+      path: "M0,35 Q20,25 40,25 T80,15 T100,5",
+      area: "M0,40 L0,35 Q20,25 40,25 T80,15 T100,5 L100,40 Z"
+    }
+  };
+
+  const currentData = activityData[timeFilter as keyof typeof activityData] || activityData['7d'];
+
+  const [orderHistory] = useState([
+    { id: 'ORD000', customerName: 'Zainab U.', items: ['Tuwo x1'], total: 800, status: 'picked_up' as const, time: '2h ago' },
+    { id: 'ORD999', customerName: 'Musa K.', items: ['Masa x10'], total: 2000, status: 'picked_up' as const, time: '3h ago' },
+  ]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([
     { id: '1', name: 'Masa', price: 500, available: true, orders: 24, image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=200&q=80' },
     { id: '2', name: 'Kilishi (100g)', price: 1500, available: true, orders: 18, image: 'https://images.unsplash.com/photo-1544025162-d76694265947?w=200&q=80' },
@@ -148,50 +185,8 @@ const ChefDashboard = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            className="space-y-8"
           >
-            {/* Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              <div className="p-5 rounded-2xl bg-card shadow-card">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                    <Package className="w-5 h-5 text-primary" />
-                  </div>
-                  <span className="text-sm text-muted-foreground">Today's Orders</span>
-                </div>
-                <p className="text-3xl font-serif font-bold text-foreground">{stats.todayOrders}</p>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-card shadow-card">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-green-100 flex items-center justify-center">
-                    <DollarSign className="w-5 h-5 text-green-600" />
-                  </div>
-                  <span className="text-sm text-muted-foreground">Revenue</span>
-                </div>
-                <p className="text-3xl font-serif font-bold text-foreground">₦{stats.todayRevenue.toLocaleString()}</p>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-card shadow-card">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-                    <Star className="w-5 h-5 text-amber-600" />
-                  </div>
-                  <span className="text-sm text-muted-foreground">Rating</span>
-                </div>
-                <p className="text-3xl font-serif font-bold text-foreground">{stats.rating}</p>
-              </div>
-
-              <div className="p-5 rounded-2xl bg-card shadow-card">
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-                    <TrendingUp className="w-5 h-5 text-blue-600" />
-                  </div>
-                  <span className="text-sm text-muted-foreground">Pending</span>
-                </div>
-                <p className="text-3xl font-serif font-bold text-foreground">{stats.pendingOrders}</p>
-              </div>
-            </div>
-
             {/* Active Orders */}
             <section className="max-w-2xl">
               <div className="flex items-center justify-between mb-4">
@@ -251,56 +246,24 @@ const ChefDashboard = () => {
               </div>
             </section>
 
-            {/* Performance Overview (Consolidated Analytics) */}
-            <section className="mt-12 pt-12 border-t border-border space-y-8 pb-8">
-              <h2 className="text-xl font-serif font-bold text-foreground">Performance Overview</h2>
-              <div className="grid md:grid-cols-2 gap-6">
-                <div className="p-6 rounded-3xl bg-card shadow-card border border-border">
-                  <h3 className="font-bold mb-4 flex items-center gap-2">
-                    <TrendingUp className="w-5 h-5 text-blue-500" />
-                    Weekly Growth
-                  </h3>
-                  <div className="h-48 flex items-end gap-2 px-2">
-                    {[40, 65, 45, 90, 55, 75, 85].map((h, i) => (
-                      <div key={i} className="flex-1 flex flex-col items-center gap-2">
-                        <div
-                          className={`w-full rounded-t-lg transition-all duration-500 ${i === 3 ? 'bg-primary' : 'bg-primary/20'}`}
-                          style={{ height: `${h}%` }}
-                        />
-                        <span className="text-[10px] text-muted-foreground">Day {i + 1}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="p-1 rounded-3xl bg-card shadow-card border border-border overflow-hidden">
-                  <div className="p-5">
-                    <h3 className="font-bold mb-4 flex items-center gap-2">
-                      <Star className="w-5 h-5 text-amber-500 fill-amber-500" />
-                      Top Rated Dishes
-                    </h3>
-                    <div className="space-y-3">
-                      {[
-                        { name: 'Masa Special', rating: 4.9, count: 128 },
-                        { name: 'Kilishi Gold', rating: 4.8, count: 95 },
-                        { name: 'Tuwo King', rating: 4.7, count: 82 },
-                      ].map((dish, i) => (
-                        <div key={i} className="flex items-center justify-between p-3 rounded-2xl bg-secondary/30">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary text-xs">
-                              {i + 1}
-                            </div>
-                            <span className="font-medium text-sm">{dish.name}</span>
-                          </div>
-                          <div className="flex items-center gap-1.5 font-bold text-sm">
-                            <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
-                            {dish.rating}
-                          </div>
-                        </div>
-                      ))}
+            {/* Order History */}
+            <section className="max-w-2xl">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-serif font-bold text-foreground">Recently Completed</h2>
+              </div>
+              <div className="space-y-3">
+                {orderHistory.map((order) => (
+                  <div key={order.id} className="p-4 rounded-2xl bg-card border border-border flex items-center justify-between opacity-70">
+                    <div>
+                      <p className="font-bold text-sm">{order.customerName}</p>
+                      <p className="text-xs text-muted-foreground">{order.items.join(', ')}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-sm">₦{order.total.toLocaleString()}</p>
+                      <p className="text-[10px] text-muted-foreground">{order.time}</p>
                     </div>
                   </div>
-                </div>
+                ))}
               </div>
             </section>
           </motion.div>
@@ -310,62 +273,225 @@ const ChefDashboard = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="max-w-2xl"
+            className="space-y-8"
           >
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-2xl font-serif font-bold text-foreground">Menu Items</h2>
-                <p className="text-sm text-muted-foreground">Manage your dishes and availability</p>
+            {/* Business Stats Grid (Moved here) */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="p-5 rounded-2xl bg-card border border-border shadow-soft">
+                <div className="flex items-center gap-2 mb-2">
+                  <Package className="w-4 h-4 text-primary" />
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Orders</span>
+                </div>
+                <p className="text-2xl font-serif font-bold">{stats.todayOrders}</p>
               </div>
-              <Button
-                onClick={() => setIsAddingItem(true)}
-                className="gap-2 shadow-soft"
-              >
-                <Plus className="w-4 h-4" />
-                Add Item
-              </Button>
+              <div className="p-5 rounded-2xl bg-card border border-border shadow-soft">
+                <div className="flex items-center gap-2 mb-2">
+                  <DollarSign className="w-4 h-4 text-green-600" />
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Revenue</span>
+                </div>
+                <p className="text-2xl font-serif font-bold">₦{stats.todayRevenue.toLocaleString()}</p>
+              </div>
+              <div className="p-5 rounded-2xl bg-card border border-border shadow-soft">
+                <div className="flex items-center gap-2 mb-2">
+                  <Star className="w-4 h-4 text-amber-500" />
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Rating</span>
+                </div>
+                <p className="text-2xl font-serif font-bold">{stats.rating}</p>
+              </div>
+              <div className="p-5 rounded-2xl bg-card border border-border shadow-soft">
+                <div className="flex items-center gap-2 mb-2">
+                  <TrendingUp className="w-4 h-4 text-blue-600" />
+                  <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Pending</span>
+                </div>
+                <p className="text-2xl font-serif font-bold">{stats.pendingOrders}</p>
+              </div>
             </div>
 
-            <div className="space-y-4">
-              {menuItems.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-center gap-4 p-4 rounded-2xl bg-card shadow-card border border-border group hover:border-primary/30 transition-all"
-                >
-                  <div className="relative w-20 h-20 rounded-xl overflow-hidden shadow-inner">
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                    />
-                    {!item.available && (
-                      <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] flex items-center justify-center">
-                        <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Out of Stock</span>
-                      </div>
-                    )}
-                  </div>
+            {/* Activity Line Graph */}
+            <div className="p-6 rounded-[2.5rem] bg-card border border-border shadow-soft">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="font-bold flex items-center gap-2">
+                  <TrendingUp className="w-5 h-5 text-primary" />
+                  Store Activity
+                </h3>
+                <div className="relative">
+                  <button
+                    onClick={() => setIsFilterOpen(!isFilterOpen)}
+                    className="flex items-center gap-2 bg-secondary/50 hover:bg-secondary/80 border border-border/50 rounded-xl px-4 py-2 text-xs font-bold text-foreground transition-all shadow-sm active:scale-95"
+                  >
+                    <span>
+                      {timeFilter === '7d' && "Last 7 Days"}
+                      {timeFilter === 'month' && "This Month"}
+                      {timeFilter === 'q2' && "Q2 2025"}
+                      {timeFilter === 'q3' && "Q3 2025"}
+                      {timeFilter === 'q4' && "Q4 2025"}
+                      {timeFilter === 'year' && "Full Year 2025"}
+                    </span>
+                    <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-300 ${isFilterOpen ? 'rotate-180' : ''}`} />
+                  </button>
 
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <h3 className="font-bold text-foreground truncate">{item.name}</h3>
-                      <Switch
-                        checked={item.available}
-                        onCheckedChange={() => toggleItemAvailability(item.id)}
-                        className="scale-90"
+                  <AnimatePresence>
+                    {isFilterOpen && (
+                      <>
+                        <div
+                          className="fixed inset-0 z-40"
+                          onClick={() => setIsFilterOpen(false)}
+                        />
+                        <motion.div
+                          initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                          className="absolute right-0 mt-2 w-48 bg-card/90 backdrop-blur-xl border border-border shadow-elevated rounded-2xl p-2 z-50 overflow-hidden"
+                        >
+                          <div className="px-3 py-2 text-[10px] font-bold text-muted-foreground uppercase tracking-widest border-b border-border/50 mb-1">
+                            Select Period
+                          </div>
+                          {[
+                            { id: '7d', label: 'Last 7 Days' },
+                            { id: 'month', label: 'This Month' },
+                            { id: 'q2', label: 'Q2 2025' },
+                            { id: 'q3', label: 'Q3 2025' },
+                            { id: 'q4', label: 'Q4 2025' },
+                            { id: 'year', label: 'Full Year 2025' },
+                          ].map((option) => (
+                            <button
+                              key={option.id}
+                              onClick={() => {
+                                setTimeFilter(option.id);
+                                setIsFilterOpen(false);
+                              }}
+                              className={`w-full text-left px-3 py-2.5 rounded-xl text-xs font-medium transition-colors flex items-center justify-between group ${timeFilter === option.id
+                                  ? 'bg-primary text-primary-foreground'
+                                  : 'hover:bg-secondary text-foreground'
+                                }`}
+                            >
+                              {option.label}
+                              {timeFilter === option.id && (
+                                <div className="w-1.5 h-1.5 rounded-full bg-primary-foreground" />
+                              )}
+                            </button>
+                          ))}
+                        </motion.div>
+                      </>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </div>
+
+              <div className="h-40 w-full relative">
+                {/* SVG Line Graph */}
+                <svg className="w-full h-full" viewBox="0 0 100 40" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="lineGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.2" />
+                      <stop offset="100%" stopColor="var(--primary)" stopOpacity="0" />
+                    </linearGradient>
+                  </defs>
+
+                  {/* Area */}
+                  <motion.path
+                    inherit={false}
+                    initial={false}
+                    animate={{ d: currentData.area }}
+                    transition={{ type: 'spring', damping: 20, stiffness: 100 }}
+                    fill="url(#lineGradient)"
+                  />
+
+                  {/* Line */}
+                  <motion.path
+                    inherit={false}
+                    initial={false}
+                    animate={{ d: currentData.path }}
+                    transition={{ type: 'spring', damping: 20, stiffness: 100 }}
+                    fill="none"
+                    stroke="var(--primary)"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    className="drop-shadow-sm"
+                  />
+
+                  {/* Points */}
+                  {currentData.points.map((y, i) => {
+                    const x = (i / (currentData.points.length - 1)) * 100;
+                    return (
+                      <motion.circle
+                        key={`${timeFilter}-${i}`}
+                        inherit={false}
+                        initial={{ opacity: 0, scale: 0 }}
+                        animate={{ opacity: 1, scale: 1, cx: x, cy: y }}
+                        transition={{ delay: i * 0.05 }}
+                        r="1.2"
+                        fill="white"
+                        stroke="var(--primary)"
+                        strokeWidth="0.6"
                       />
+                    );
+                  })}
+                </svg>
+              </div>
+              <div className="flex justify-between mt-6 px-1">
+                {currentData.labels.map(label => (
+                  <span key={label} className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">{label}</span>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-2xl font-serif font-bold text-foreground">Menu Items</h2>
+                  <p className="text-sm text-muted-foreground">Manage your dishes and availability</p>
+                </div>
+                <Button
+                  onClick={() => setIsAddingItem(true)}
+                  className="gap-2 shadow-soft"
+                >
+                  <Plus className="w-4 h-4" />
+                  Add Item
+                </Button>
+              </div>
+
+              <div className="space-y-4">
+                {menuItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="flex items-center gap-4 p-4 rounded-2xl bg-card shadow-card border border-border group hover:border-primary/30 transition-all"
+                  >
+                    <div className="relative w-20 h-20 rounded-xl overflow-hidden shadow-inner">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                      />
+                      {!item.available && (
+                        <div className="absolute inset-0 bg-background/60 backdrop-blur-[2px] flex items-center justify-center">
+                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Out of Stock</span>
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center gap-4 text-sm mt-1">
-                      <span className="font-bold text-primary">₦{item.price.toLocaleString()}</span>
-                      <div className="flex items-center gap-1 text-muted-foreground">
-                        <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
-                        <span>4.8</span>
-                        <span>•</span>
-                        <span>{item.orders} orders</span>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="font-bold text-foreground truncate">{item.name}</h3>
+                        <Switch
+                          checked={item.available}
+                          onCheckedChange={() => toggleItemAvailability(item.id)}
+                          className="scale-90"
+                        />
+                      </div>
+                      <div className="flex items-center gap-4 text-sm mt-1">
+                        <span className="font-bold text-primary">₦{item.price.toLocaleString()}</span>
+                        <div className="flex items-center gap-1 text-muted-foreground">
+                          <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
+                          <span>4.8</span>
+                          <span>•</span>
+                          <span>{item.orders} orders</span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
 
             {/* Add Item Modal Overlay */}
@@ -441,27 +567,7 @@ const ChefDashboard = () => {
                           </div>
                         </div>
 
-                        {/* Details */}
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2">
-                            <label className="text-xs font-bold text-muted-foreground uppercase ml-1">Calories</label>
-                            <Input
-                              placeholder="450 kcal"
-                              className="rounded-2xl bg-secondary/30 border-none h-12 px-5"
-                              value={newDish.calories}
-                              onChange={(e) => setNewDish({ ...newDish, calories: e.target.value })}
-                            />
-                          </div>
-                          <div className="space-y-2">
-                            <label className="text-xs font-bold text-muted-foreground uppercase ml-1">Prep Time</label>
-                            <Input
-                              placeholder="20-25 min"
-                              className="rounded-2xl bg-secondary/30 border-none h-12 px-5"
-                              value={newDish.prepTime}
-                              onChange={(e) => setNewDish({ ...newDish, prepTime: e.target.value })}
-                            />
-                          </div>
-                        </div>
+                        {/* Details removed (calories and prep time) */}
 
                         <div className="space-y-2">
                           <label className="text-xs font-bold text-muted-foreground uppercase ml-1">Description</label>
@@ -510,8 +616,6 @@ const ChefDashboard = () => {
                                   price: '',
                                   category: 'Main Course',
                                   description: '',
-                                  calories: '450 kcal',
-                                  prepTime: '20-25 min',
                                   image: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=80'
                                 });
                               }
@@ -590,6 +694,27 @@ const ChefDashboard = () => {
                 </div>
               </div>
 
+              <div className="p-6 rounded-3xl bg-card border border-border shadow-soft">
+                <h3 className="font-bold mb-4 flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-primary" />
+                  Business Settings
+                </h3>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-muted-foreground uppercase ml-1">Standard Preparation Time (mins)</label>
+                    <div className="flex items-center gap-4">
+                      <Input
+                        type="number"
+                        value={standardPrepTime}
+                        onChange={(e) => setStandardPrepTime(e.target.value)}
+                        className="rounded-2xl bg-secondary/30 border-none h-12 px-4 w-32"
+                      />
+                      <span className="text-sm text-muted-foreground font-medium">Average time per order</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <Button className="w-full py-6 rounded-2xl font-bold shadow-elevated">Save Changes</Button>
             </div>
           </motion.div>
@@ -641,15 +766,6 @@ const ChefDashboard = () => {
       <nav className="fixed bottom-0 left-0 right-0 bg-card/80 backdrop-blur-xl border-t border-border px-6 py-4 pb-8 z-50">
         <div className="flex items-center justify-around max-w-md mx-auto">
           <button
-            onClick={() => setActiveTab('orders')}
-            className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'orders' ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'}`}
-          >
-            <div className={`p-2 rounded-xl ${activeTab === 'orders' ? 'bg-primary/10' : ''}`}>
-              <Package className="w-5 h-5" />
-            </div>
-            <span className="text-[10px] font-bold uppercase tracking-tighter">Orders</span>
-          </button>
-          <button
             onClick={() => setActiveTab('menu')}
             className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'menu' ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'}`}
           >
@@ -657,6 +773,15 @@ const ChefDashboard = () => {
               <ChefHat className="w-5 h-5" />
             </div>
             <span className="text-[10px] font-bold uppercase tracking-tighter">Menu</span>
+          </button>
+          <button
+            onClick={() => setActiveTab('orders')}
+            className={`flex flex-col items-center gap-1 transition-all ${activeTab === 'orders' ? 'text-primary scale-110' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            <div className={`p-2 rounded-xl ${activeTab === 'orders' ? 'bg-primary/10' : ''}`}>
+              <Package className="w-5 h-5" />
+            </div>
+            <span className="text-[10px] font-bold uppercase tracking-tighter">Orders</span>
           </button>
           <button
             onClick={() => setActiveTab('analytics' as any)} // Fallback if still named analytics in some parts of logic
