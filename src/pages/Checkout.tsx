@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MapPin, CreditCard, Banknote, CheckCircle, Clock } from 'lucide-react';
+import { ArrowLeft, MapPin, CreditCard, Banknote, CheckCircle, Clock, ChevronRight, Navigation2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -10,6 +10,19 @@ const Checkout = () => {
     const { orderItems = [], total = 0, restaurantName = '' } = location.state || {};
     const [step, setStep] = useState<'details' | 'success'>('details');
     const [paymentMethod, setPaymentMethod] = useState<'card' | 'bank' | 'cash'>('card');
+    const [isAddressDrawerOpen, setIsAddressDrawerOpen] = useState(false);
+    const [selectedAddress, setSelectedAddress] = useState({
+        id: '1',
+        type: 'Home',
+        address: 'Gombe State University',
+        sub: 'Faculty of Science, Block B'
+    });
+
+    const savedAddresses = [
+        { id: '1', type: 'Home', address: 'Gombe State University', sub: 'Faculty of Science, Block B' },
+        { id: '2', type: 'Office', address: 'NNPC Plaza', sub: 'Floor 3, Room 302' },
+        { id: '3', type: 'School', address: 'Federal University Gombe', sub: 'Hostel A, Room 12' }
+    ];
 
     if (!location.state || orderItems.length === 0) {
         return (
@@ -63,18 +76,63 @@ const Checkout = () => {
 
             <div className="max-w-xl mx-auto px-5 py-6 space-y-6">
 
-                {/* Delivery Address */}
-                <section className="space-y-3">
-                    <h2 className="font-bold text-foreground">Delivery Location</h2>
-                    <div className="bg-card p-4 rounded-2xl shadow-sm border border-border/50 flex items-start gap-3">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                            <MapPin className="w-4 h-4 text-primary" />
+                {/* Delivery Address & Map Preview */}
+                <section className="space-y-4">
+                    <div className="flex items-center justify-between px-1">
+                        <h2 className="font-bold text-foreground">Delivery Location</h2>
+                        <button
+                            onClick={() => setIsAddressDrawerOpen(true)}
+                            className="text-xs text-primary font-bold hover:underline"
+                        >
+                            Change
+                        </button>
+                    </div>
+
+                    <div className="space-y-4">
+                        <div className="bg-card p-4 rounded-3xl shadow-soft border border-border/50 flex items-start gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                                <MapPin className="w-5 h-5 text-primary" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <h3 className="font-bold text-sm text-foreground flex items-center gap-2">
+                                    {selectedAddress.type}
+                                </h3>
+                                <p className="text-xs font-bold text-foreground truncate">{selectedAddress.address}</p>
+                                <p className="text-[11px] text-muted-foreground mt-0.5 line-clamp-1">{selectedAddress.sub}</p>
+                            </div>
                         </div>
-                        <div className="flex-1">
-                            <h3 className="font-semibold text-sm">Gombe State University</h3>
-                            <p className="text-xs text-muted-foreground mt-0.5">Faculty of Science, Block B</p>
+
+                        {/* Map Preview (Customer Only) */}
+                        <div className="relative h-48 w-full rounded-[2.5rem] overflow-hidden bg-secondary/20 border border-border/50 group">
+                            {/* Mock Map Background */}
+                            <div className="absolute inset-0 bg-[url('https://maps.googleapis.com/maps/api/staticmap?center=10.2897,11.1673&zoom=15&size=600x300&scale=2&key=YOUR_API_KEY_MOCK')] bg-cover bg-center opacity-60 grayscale-[0.5] group-hover:scale-105 transition-transform duration-1000" />
+
+                            {/* Map Overlays */}
+                            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/20" />
+
+                            {/* Custom Location Tag */}
+                            <motion.div
+                                initial={{ scale: 0 }}
+                                animate={{ scale: 1 }}
+                                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
+                            >
+                                <div className="relative">
+                                    <div className="absolute inset-0 bg-primary/20 rounded-full animate-ping scale-[3]" />
+                                    <div className="relative bg-primary text-white p-2.5 rounded-2xl shadow-elevated flex items-center gap-2 border-2 border-white">
+                                        <Navigation2 className="w-3.5 h-3.5 fill-current rotate-45" />
+                                        <span className="text-[10px] font-bold uppercase tracking-wider">Your Spot</span>
+                                    </div>
+                                    {/* Stem */}
+                                    <div className="w-1 h-3 bg-white mx-auto -mt-0.5 rounded-full" />
+                                </div>
+                            </motion.div>
+
+                            <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+                                <span className="bg-white/90 backdrop-blur-md text-[10px] font-bold px-3 py-1.5 rounded-full shadow-sm text-foreground border border-white/20">
+                                    Within 1.2km of Vendor
+                                </span>
+                            </div>
                         </div>
-                        <button className="text-xs text-primary font-medium">Change</button>
                     </div>
                 </section>
 
@@ -126,8 +184,8 @@ const Checkout = () => {
                         <button
                             onClick={() => setPaymentMethod('card')}
                             className={`p-3 rounded-xl border flex flex-col items-center gap-2 transition-colors ${paymentMethod === 'card'
-                                    ? 'border-primary bg-primary/5 text-primary'
-                                    : 'border-border bg-card text-muted-foreground hover:bg-secondary'
+                                ? 'border-primary bg-primary/5 text-primary'
+                                : 'border-border bg-card text-muted-foreground hover:bg-secondary'
                                 }`}
                         >
                             <CreditCard className="w-6 h-6" />
@@ -136,8 +194,8 @@ const Checkout = () => {
                         <button
                             onClick={() => setPaymentMethod('bank')}
                             className={`p-3 rounded-xl border flex flex-col items-center gap-2 transition-colors ${paymentMethod === 'bank'
-                                    ? 'border-primary bg-primary/5 text-primary'
-                                    : 'border-border bg-card text-muted-foreground hover:bg-secondary'
+                                ? 'border-primary bg-primary/5 text-primary'
+                                : 'border-border bg-card text-muted-foreground hover:bg-secondary'
                                 }`}
                         >
                             <div className="w-6 h-6 flex items-center justify-center font-bold text-lg">₦</div>
@@ -146,8 +204,8 @@ const Checkout = () => {
                         <button
                             onClick={() => setPaymentMethod('cash')}
                             className={`p-3 rounded-xl border flex flex-col items-center gap-2 transition-colors ${paymentMethod === 'cash'
-                                    ? 'border-primary bg-primary/5 text-primary'
-                                    : 'border-border bg-card text-muted-foreground hover:bg-secondary'
+                                ? 'border-primary bg-primary/5 text-primary'
+                                : 'border-border bg-card text-muted-foreground hover:bg-secondary'
                                 }`}
                         >
                             <Banknote className="w-6 h-6" />
@@ -167,6 +225,70 @@ const Checkout = () => {
                     Place Order - ₦{(total + 600).toLocaleString()}
                 </Button>
             </div>
+            {/* Address Selection Drawer */}
+            <AnimatePresence>
+                {isAddressDrawerOpen && (
+                    <>
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
+                            onClick={() => setIsAddressDrawerOpen(false)}
+                            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-[100]"
+                        />
+                        <motion.div
+                            initial={{ y: '100%' }}
+                            animate={{ y: 0 }}
+                            exit={{ y: '100%' }}
+                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                            className="fixed bottom-0 left-0 right-0 max-w-xl mx-auto bg-card rounded-t-[40px] z-[101] overflow-hidden flex flex-col max-h-[80vh]"
+                        >
+                            <div className="w-12 h-1.5 bg-secondary rounded-full mx-auto mt-4 mb-2 opacity-50 shrink-0" />
+                            <div className="px-6 py-4 border-b border-border/30 flex justify-between items-center shrink-0">
+                                <h3 className="text-xl font-bold font-serif text-foreground">Select Address</h3>
+                                <button
+                                    onClick={() => setIsAddressDrawerOpen(false)}
+                                    className="p-2 rounded-full bg-secondary hover:bg-secondary/70 transition-colors"
+                                >
+                                    <X className="w-5 h-5 text-muted-foreground" />
+                                </button>
+                            </div>
+                            <div className="flex-1 overflow-y-auto px-6 py-6 pb-12 space-y-3">
+                                {savedAddresses.map((addr) => (
+                                    <button
+                                        key={addr.id}
+                                        onClick={() => {
+                                            setSelectedAddress(addr);
+                                            setIsAddressDrawerOpen(false);
+                                        }}
+                                        className={`w-full p-4 rounded-3xl border text-left transition-all ${selectedAddress.id === addr.id
+                                                ? 'border-primary bg-primary/5 shadow-soft'
+                                                : 'border-border/50 bg-secondary/10 hover:border-primary/20'
+                                            }`}
+                                    >
+                                        <div className="flex items-center gap-4">
+                                            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${selectedAddress.id === addr.id ? 'bg-primary text-white' : 'bg-card text-muted-foreground shadow-sm'
+                                                }`}>
+                                                <MapPin className="w-5 h-5" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h4 className="font-bold text-sm text-foreground">{addr.type}</h4>
+                                                <p className="text-xs font-bold text-foreground truncate">{addr.address}</p>
+                                                <p className="text-[11px] text-muted-foreground truncate">{addr.sub}</p>
+                                            </div>
+                                            {selectedAddress.id === addr.id && (
+                                                <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
+                                                    <CheckCircle className="w-4 h-4 text-white" />
+                                                </div>
+                                            )}
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </motion.div>
+                    </>
+                )}
+            </AnimatePresence>
         </div>
     );
 };
