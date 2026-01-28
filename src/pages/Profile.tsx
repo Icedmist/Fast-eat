@@ -13,7 +13,10 @@ import {
     Heart,
     Star,
     X,
-    Plus
+    Plus,
+    Navigation2,
+    Briefcase,
+    GraduationCap
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -28,6 +31,12 @@ const Profile = () => {
     // Load favorites from localStorage
     const favoriteIds = JSON.parse(localStorage.getItem('favorites') || '[]');
     const favoriteRestaurants = restaurants.filter(r => favoriteIds.includes(r.id));
+
+    const [savedAddresses, setSavedAddresses] = useState([
+        { id: '1', type: 'Home', address: 'Gombe State University', sub: 'Faculty of Science, Block B', isDefault: true, icon: 'home' },
+        { id: '2', type: 'Office', address: 'NNPC Plaza', sub: 'Floor 3, Room 302', isDefault: false, icon: 'briefcase' },
+        { id: '3', type: 'School', address: 'Federal University Gombe', sub: 'Hostel A, Room 12', isDefault: false, icon: 'graduation-cap' }
+    ]);
 
     const menuItems = [
         { id: 'profile', icon: User, label: 'Edit Profile', subLabel: 'Username, email, bio', color: 'bg-blue-500' },
@@ -93,23 +102,43 @@ const Profile = () => {
             case 'addresses':
                 return (
                     <div className="space-y-6">
-                        <div className="space-y-3">
-                            <div className="p-4 rounded-2xl border border-primary/20 bg-primary/5 flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-primary text-white flex items-center justify-center">
-                                        <MapPin className="w-5 h-5" />
+                        <div className="space-y-4">
+                            {savedAddresses.map((addr) => (
+                                <div
+                                    key={addr.id}
+                                    className={`p-4 rounded-3xl border transition-all ${addr.isDefault ? 'border-primary/20 bg-primary/5' : 'border-border/50 bg-secondary/10'}`}
+                                >
+                                    <div className="flex items-center justify-between mb-2">
+                                        <div className="flex items-center gap-3">
+                                            <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${addr.isDefault ? 'bg-primary text-white' : 'bg-secondary text-muted-foreground'}`}>
+                                                {addr.type === 'Home' ? <Plus className="w-5 h-5" /> : (addr.type === 'Office' ? <Briefcase className="w-5 h-5" /> : <GraduationCap className="w-5 h-5" />)}
+                                            </div>
+                                            <div>
+                                                <h4 className="font-bold text-sm flex items-center gap-2">
+                                                    {addr.type}
+                                                    {addr.isDefault && <span className="text-[10px] bg-primary/10 text-primary px-2 py-0.5 rounded-full uppercase tracking-tighter">Default</span>}
+                                                </h4>
+                                                <p className="text-xs font-bold text-foreground truncate">{addr.address}</p>
+                                            </div>
+                                        </div>
+                                        <button className="text-[11px] font-bold text-primary hover:underline">Edit</button>
                                     </div>
-                                    <div>
-                                        <p className="font-bold text-sm">Home</p>
-                                        <p className="text-xs text-muted-foreground">123 Market Road, Gombe</p>
-                                    </div>
+                                    <p className="text-[11px] text-muted-foreground ml-13 leading-relaxed">{addr.sub}</p>
                                 </div>
-                                <Button variant="ghost" size="sm" className="text-xs font-bold text-primary px-2">Edit</Button>
-                            </div>
-                            <Button variant="outline" className="w-full h-14 rounded-2xl border-dashed border-2 flex items-center justify-center gap-2 text-muted-foreground hover:text-primary transition-colors">
-                                <Plus className="w-5 h-5" />
-                                <span className="font-bold text-sm">Add New Address</span>
-                            </Button>
+                            ))}
+                        </div>
+
+                        <Button
+                            variant="outline"
+                            className="w-full h-14 rounded-2xl border-dashed border-2 gap-2 text-muted-foreground hover:text-primary hover:border-primary/50"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Add New Address
+                        </Button>
+
+                        <div className="p-5 rounded-3xl bg-secondary/20 border border-dashed border-border flex items-center justify-center gap-3 cursor-pointer hover:bg-secondary/40 transition-all">
+                            <Navigation2 className="w-5 h-5 text-primary" />
+                            <span className="text-sm font-bold">Detect Current Location</span>
                         </div>
                     </div>
                 );
@@ -238,7 +267,7 @@ const Profile = () => {
                 </button>
             </motion.header>
 
-            <div className="max-w-2xl mx-auto px-5 pt-8 pb-24 space-y-8">
+            <div className="max-w-5xl mx-auto px-5 pt-8 pb-24 space-y-8">
                 {/* User Info Card */}
                 <motion.div
                     initial={{ opacity: 0, scale: 0.95 }}
@@ -364,7 +393,7 @@ const Profile = () => {
                             animate={{ y: 0 }}
                             exit={{ y: '100%' }}
                             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                            className="fixed bottom-0 left-0 right-0 max-w-2xl mx-auto bg-card rounded-t-[40px] z-[60] shadow-2xl overflow-hidden flex flex-col max-h-[90dvh]"
+                            className="fixed bottom-0 left-0 right-0 max-w-5xl mx-auto bg-card rounded-t-[40px] z-[60] shadow-2xl overflow-hidden flex flex-col max-h-[90dvh]"
                         >
                             <div className="w-12 h-1.5 bg-secondary rounded-full mx-auto mt-4 mb-2 opacity-50 shrink-0" />
                             <div className="px-6 py-4 border-b border-border/30 flex justify-between items-center shrink-0">

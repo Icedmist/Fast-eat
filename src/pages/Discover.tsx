@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Bell, User, Filter, Maximize2, Minimize2, MessageCircle } from 'lucide-react';
+import { Search, Bell, User, Filter, Maximize2, Minimize2, MessageCircle, Navigation2, MapPin } from 'lucide-react';
 import RestaurantMap from '@/components/RestaurantMap';
 import BottomSheet from '@/components/BottomSheet';
 import { useNavigate } from 'react-router-dom';
@@ -70,11 +70,22 @@ const Discover = () => {
         className="absolute top-0 left-0 right-0 z-[60] px-5 pt-12 pb-4 pointer-events-none"
       >
         <div className="flex items-center justify-between pointer-events-auto">
-          <div className="opacity-100 transition-opacity">
-            <p className="text-sm text-muted-foreground font-sans">Exploring</p>
-            <h1 className="text-lg font-serif font-semibold text-foreground">
-              Gombe, Nigeria
-            </h1>
+          <div className="flex items-center gap-3">
+            <button
+              className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white/80 backdrop-blur-md border border-white/20 shadow-soft hover:bg-white transition-all active:scale-95 group pointer-events-auto"
+            >
+              <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
+                <Navigation2 className="w-4 h-4" />
+              </div>
+              <div className="text-left text-foreground">
+                <p className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-0.5">Your Location</p>
+                <div className="flex items-center gap-1">
+                  <h1 className="text-sm font-bold truncate max-w-[120px]">
+                    Gombe, Nigeria
+                  </h1>
+                </div>
+              </div>
+            </button>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2">
             <button
