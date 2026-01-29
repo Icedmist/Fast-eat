@@ -1,17 +1,21 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { 
-  Bike, 
-  Navigation, 
-  Phone, 
-  MapPin, 
+import {
+  Bike,
+  Navigation,
+  Phone,
+  MapPin,
   Clock,
   DollarSign,
   Star,
   ChevronUp,
   CheckCircle,
   AlertTriangle,
-  Package
+  Package,
+  Maximize2,
+  Minimize2,
+  Bell,
+  User
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
@@ -45,6 +49,7 @@ const RiderDashboard = () => {
   const mapRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
   const [isOnline, setIsOnline] = useState(true);
+  const [isMapFullScreen, setIsMapFullScreen] = useState(false);
   const [currentOrder, setCurrentOrder] = useState<DeliveryOrder | null>({
     id: 'DEL001',
     status: 'pickup',
@@ -149,7 +154,7 @@ const RiderDashboard = () => {
         [currentOrder.chef.lat, currentOrder.chef.lng],
         [currentOrder.customer.lat, currentOrder.customer.lng],
       ];
-      
+
       L.polyline(routeCoords, {
         color: 'hsl(16 65% 50%)',
         weight: 4,
@@ -184,7 +189,7 @@ const RiderDashboard = () => {
   return (
     <div className="h-[100dvh] w-full relative overflow-hidden bg-background">
       {/* Map */}
-      <div ref={mapRef} className="absolute inset-0 w-full h-full" />
+      <div ref={mapRef} className="absolute inset-0 w-full h-full z-0" />
 
       {/* Header */}
       <motion.header
@@ -203,12 +208,23 @@ const RiderDashboard = () => {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 px-4 py-2 rounded-full bg-secondary">
-            <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500' : 'bg-muted-foreground'}`} />
-            <span className="text-sm font-medium text-foreground">
-              {isOnline ? 'Online' : 'Offline'}
-            </span>
-            <Switch checked={isOnline} onCheckedChange={setIsOnline} />
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <button
+              onClick={() => setIsMapFullScreen(!isMapFullScreen)}
+              className="p-2.5 rounded-full glass shadow-soft bg-white/80 hover:bg-white transition-all active:scale-95"
+            >
+              {isMapFullScreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+            </button>
+            <button className="p-2.5 rounded-full glass shadow-soft bg-white/80 hover:bg-white transition-all active:scale-95 relative">
+              <Bell className="w-4 h-4 text-foreground" />
+              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-primary rounded-full" />
+            </button>
+            <button
+              onClick={() => window.location.href = '/rider-profile'}
+              className="p-2.5 rounded-full glass shadow-soft bg-white/80 hover:bg-white transition-all active:scale-95"
+            >
+              <User className="w-4 h-4 text-foreground" />
+            </button>
           </div>
         </div>
       </motion.header>
@@ -248,8 +264,8 @@ const RiderDashboard = () => {
         </div>
       </motion.div>
 
-      {/* Bottom Order Panel */}
-      {currentOrder && (
+      {/* Bottom Order Panel - Hidden when map is fullscreen */}
+      {currentOrder && !isMapFullScreen && (
         <motion.div
           initial={{ y: '100%' }}
           animate={{ y: 0 }}
@@ -267,8 +283,8 @@ const RiderDashboard = () => {
               <div>
                 <p className="text-sm text-muted-foreground">Order #{currentOrder.id}</p>
                 <h2 className="text-xl font-serif font-bold text-foreground">
-                  {currentOrder.status === 'pickup' ? 'Pickup from Chef' : 
-                   currentOrder.status === 'delivering' ? 'Delivering to Customer' : 'Completed'}
+                  {currentOrder.status === 'pickup' ? 'Pickup from Chef' :
+                    currentOrder.status === 'delivering' ? 'Delivering to Customer' : 'Completed'}
                 </h2>
               </div>
               <div className="flex items-center gap-2 px-3 py-2 rounded-full bg-primary/10">
@@ -280,12 +296,10 @@ const RiderDashboard = () => {
             {/* Current Destination */}
             <div className="p-4 rounded-2xl bg-secondary mb-4">
               <div className="flex items-start gap-4">
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
-                  currentOrder.status === 'pickup' ? 'bg-primary/10' : 'bg-green-100'
-                }`}>
-                  <MapPin className={`w-5 h-5 ${
-                    currentOrder.status === 'pickup' ? 'text-primary' : 'text-green-600'
-                  }`} />
+                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${currentOrder.status === 'pickup' ? 'bg-primary/10' : 'bg-green-100'
+                  }`}>
+                  <MapPin className={`w-5 h-5 ${currentOrder.status === 'pickup' ? 'text-primary' : 'text-green-600'
+                    }`} />
                 </div>
                 <div className="flex-1">
                   <p className="font-semibold text-foreground">
