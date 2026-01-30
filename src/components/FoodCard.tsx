@@ -1,80 +1,102 @@
 import { motion } from 'framer-motion';
 import { Star, MapPin } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import type { MenuItem } from '@/data/restaurants';
 
-export interface FoodItem extends MenuItem {
-  vendorId: string;
-  vendorName: string;
-  vendorDistance: string;
+// This interface now correctly reflects the data structure from Supabase,
+// including the nested restaurant, which can be null.
+export interface Dish {
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+  image_url: string; // Correct property from Supabase is image_url
+  category: string;
+  rating?: number;
+  restaurants: { // This can be null if the restaurant is deleted
+    id: string;
+    name: string;
+  } | null;
 }
 
 interface FoodCardProps {
-  item: FoodItem; // Changed from restaurant
+  item: Dish;
   index: number;
 }
 
 const FoodCard = ({ item, index }: FoodCardProps) => {
   const navigate = useNavigate();
 
+  // --- Start of Defensive Code ---
+  // If the entire item is missing, render nothing. This prevents a crash.
+  if (!item) {
+    return null;
+  }
+
+  // Safely access the vendor (restaurant) ID and name.
+  // Provide a fallback if the restaurant data is missing.
+  const vendorId = item.restaurants?.id;
+  const vendorName = item.restaurants?.name || 'Unknown Restaurant';
+  
+  // Hardcoded distance for now, as it's not in the database.
+  const vendorDistance = "0.5km"; 
+
   const handleClick = () => {
-    navigate(`/restaurant/${item.vendorId}`);
+    // Only allow navigation if the restaurant exists.
+    if (vendorId) {
+      navigate(`/restaurant/${vendorId}`);
+    }
   };
+  // --- End of Defensive Code ---
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: 0.4,
-        delay: index * 0.1,
-        ease: [0.25, 0.46, 0.45, 0.94],
-      }}
-      onClick={handleClick}
-      className="flex gap-3 sm:gap-4 p-3 sm:p-4 bg-card rounded-2xl shadow-card hover:shadow-elevated transition-shadow cursor-pointer group"
+      transition={{ duration: 0.3, delay: index * 0.05 }}
+      // Disable clicks and reduce opacity if the restaurant is missing.
+      onClick={vendorId ? handleClick : undefined}
+      className={`flex gap-4 p-3 bg-card rounded-2xl border ${vendorId ? 'cursor-pointer hover:border-primary/30 transition-all' : 'opacity-60'}`}
     >
       {/* Image */}
-      <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 overflow-hidden rounded-xl bg-secondary">
+      <div className="w-24 h-24 flex-shrink-0 overflow-hidden rounded-xl bg-secondary">
         <img
-          src={item.image}
-          alt={item.name}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          src={item.image_url} // Use the correct image_url property
+          alt={item.name || 'Dish image'} // Fallback for alt text
+          className="w-full h-full object-cover"
+          // Prevent crash if image fails to load
+          onError={(e) => (e.currentTarget.src = 'https://placehold.co/400x400/f0f0f0/ccc?text=?')}
         />
       </div>
 
       {/* Content */}
-      <div className="flex flex-col justify-between flex-1 min-w-0 py-0.5">
-        <div>
-          <div className="flex items-start justify-between gap-1 sm:gap-2">
-            <h3 className="font-semibold text-sm sm:text-base text-foreground truncate">
-              {item.name}
-            </h3>
-            <span className="text-xs sm:text-sm font-semibold text-primary flex-shrink-0">
-              ₦{item.price.toLocaleString()}
-            </span>
-          </div>
-          <p className="text-[10px] sm:text-xs font-medium text-muted-foreground mb-0.5 sm:mb-1">
-            by {item.vendorName}
-          </p>
-          <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2">
-            {item.description}
-          </p>
+      <div className="flex flex-col flex-1 min-w-0">
+        <div className="flex items-start justify-between gap-2">
+          <h3 className="font-bold text-foreground truncate pr-2">
+            {item.name || 'Unnamed Dish'} {/* Fallback for name */}
+          </h3>
+          <span className="text-sm font-bold text-primary flex-shrink-0">
+            {/* Fallback for price */}
+            ₦{(item.price || 0).toLocaleString()}
+          </span>
         </div>
-
-        <div className="flex items-center gap-2 sm:gap-3 mt-1.5 sm:mt-2">
+        <p className="text-xs font-medium text-muted-foreground mb-1">
+          by {vendorName}
+        </p>
+        <p className="text-xs text-muted-foreground line-clamp-2">
+          {item.description || 'No description available.'} {/* Fallback for description */}
+        </p>
+        
+        <div className="flex items-center gap-3 mt-auto pt-2">
           <div className="flex items-center gap-1">
-            <Star className="w-3.5 h-3.5 sm:w-4 sm:h-4 fill-primary text-primary" />
-            <span className="text-xs sm:text-sm font-medium text-foreground">
-              {item.rating || 4.5}
+            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
+            <span className="text-xs font-medium text-foreground">
+              {item.rating || 'N/A'} {/* Fallback for rating */}
             </span>
           </div>
           <div className="flex items-center gap-1 text-muted-foreground">
-            <MapPin className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-            <span className="text-xs sm:text-sm">{item.vendorDistance}</span>
+            <MapPin className="w-3.5 h-3.5" />
+            <span className="text-xs">{vendorDistance}</span>
           </div>
-          <span className="text-[9px] sm:text-xs px-1.5 sm:px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">
-            {item.category}
-          </span>
         </div>
       </div>
     </motion.div>

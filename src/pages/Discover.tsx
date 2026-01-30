@@ -1,143 +1,100 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Bell, User, Filter, Maximize2, Minimize2, MessageCircle, Navigation2, MapPin } from 'lucide-react';
-import RestaurantMap from '@/components/RestaurantMap';
+import { useState, useEffect, useMemo } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 import BottomSheet from '@/components/BottomSheet';
-import { useNavigate } from 'react-router-dom';
-import { restaurants, type Category } from '@/data/restaurants';
+import RestaurantMap from '@/components/RestaurantMap';
+import type { Dish } from '@/components/FoodCard';
 
-export type FilterState = {
-  category: Category | 'All';
+export interface FilterState {
+  searchTerm: string;
+  category: string | 'All';
   topRated: boolean;
-  masa: boolean;
-};
+}
 
 const Discover = () => {
-  const navigate = useNavigate();
-  const [isListFullScreen, setIsListFullScreen] = useState(false);
-  const [isMapFullScreen, setIsMapFullScreen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [allDishes, setAllDishes] = useState<Dish[]>([]);
+  const [restaurants, setRestaurants] = useState<any[]>([]);
+  const [isMapVisible, setMapVisible] = useState(true);
+
   const [filters, setFilters] = useState<FilterState>({
+    searchTerm: '',
     category: 'All',
     topRated: false,
-    masa: false,
   });
 
-  // Flatten all menu items with vendor info for the Feed
-  const allFoodItems = restaurants.flatMap(vendor =>
-    vendor.menu.map(item => ({
-      ...item,
-      vendorId: vendor.id,
-      vendorName: vendor.name,
-      vendorDistance: vendor.distance,
-      vendorRating: vendor.rating
-    }))
-  );
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      setError(null);
+      try {
+        const [restaurantsRes, dishesRes] = await Promise.all([
+          supabase.from('restaurants').select('*'),
+          supabase.from('dishes').select('*, restaurants(*, location)')
+        ]);
 
-  // Filter Logic for Food Items
-  const filteredFoodItems = allFoodItems.filter((item) => {
-    // 1. Category Filter
-    if (filters.category !== 'All' && item.category !== filters.category) return false;
+        if (restaurantsRes.error || dishesRes.error) {
+            throw new Error(restaurantsRes.error?.message || dishesRes.error?.message || 'An unknown error occurred');
+        }
 
-    // 2. Top Rated Filter (> 4.5) - using item rating or vendor rating fallback
-    const rating = item.rating || 4.5;
-    if (filters.topRated && rating < 4.5) return false;
+        setRestaurants(restaurantsRes.data || []);
+        
+        const validDishes = (dishesRes.data || []).filter(dish => dish.restaurants);
+        setAllDishes(validDishes as Dish[]);
 
-    // 3. Masa Filter (checks if item name or description contains Masa, or vendor tag)
-    if (filters.masa) {
-      const isMasaItem = item.name.toLowerCase().includes('masa') || item.description.toLowerCase().includes('masa');
-      // Also check if vendor is a Masa spot
-      const vendor = restaurants.find(r => r.id === item.vendorId);
-      const isMasaVendor = vendor?.tags.includes('Masa');
+      } catch (err: any) {
+        console.error('Error fetching discovery data:', err);
+        setError('Could not load data. Please try again later.');
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-      if (!isMasaItem && !isMasaVendor) return false;
-    }
+    fetchData();
+  }, []);
 
-    return true;
-  });
+  const filteredDishes = useMemo(() => {
+    return (allDishes || []).filter(dish => {
+      if (filters.topRated && (!dish.rating || dish.rating < 4.5)) return false;
+      if (filters.category !== 'All' && dish.category !== filters.category) return false;
+      
+      const searchTerm = filters.searchTerm.toLowerCase();
+      if (searchTerm) {
+          const nameMatch = dish.name.toLowerCase().includes(searchTerm);
+          const restaurantNameMatch = dish.restaurants?.name.toLowerCase().includes(searchTerm);
+          if (!nameMatch && !restaurantNameMatch) return false;
+      }
 
-  // Filter Logic for Map (Vendors)
-  // Show vendors that have at least one item in the filtered list
-  const activeVendorIds = new Set(filteredFoodItems.map(i => i.vendorId));
-  const filteredRestaurants = restaurants.filter(r => activeVendorIds.has(r.id));
+      return true;
+    });
+  }, [allDishes, filters]);
+
+  const visibleRestaurants = useMemo(() => {
+    const restaurantIds = new Set(filteredDishes.map(dish => dish.restaurants!.id));
+    return restaurants.filter(r => restaurantIds.has(r.id));
+  }, [filteredDishes, restaurants]);
 
   return (
-    <div className="relative h-[100dvh] w-full overflow-hidden bg-background">
-      {/* Header - Always visible, higher z-index to stay above fullscreen list */}
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-        className="absolute top-0 left-0 right-0 z-[60] px-5 pt-12 pb-4 pointer-events-none"
-      >
-        <div className="flex items-center justify-between pointer-events-auto">
-          <div className="flex items-center gap-3">
-            <button
-              className="flex items-center gap-2.5 px-3 py-2 rounded-xl bg-white/80 backdrop-blur-md border border-white/20 shadow-soft hover:bg-white transition-all active:scale-95 group pointer-events-auto"
-            >
-              <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
-                <Navigation2 className="w-4 h-4" />
-              </div>
-              <div className="text-left text-foreground">
-                <p className="text-[10px] font-bold text-muted-foreground uppercase leading-none mb-0.5">Your Location</p>
-                <div className="flex items-center gap-1">
-                  <h1 className="text-sm font-bold truncate max-w-[120px]">
-                    Gombe, Nigeria
-                  </h1>
-                </div>
-              </div>
-            </button>
-          </div>
-          <div className="flex items-center gap-1.5 sm:gap-2">
-            <button
-              onClick={() => {
-                setIsMapFullScreen(!isMapFullScreen);
-                if (isListFullScreen) setIsListFullScreen(false);
-              }}
-              className="p-2.5 sm:p-3 rounded-full glass shadow-soft bg-white/80"
-            >
-              {isMapFullScreen ? <Minimize2 className="w-4 h-4 sm:w-5 sm:h-5" /> : <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5" />}
-            </button>
-            <button
-              onClick={() => navigate('/chat')}
-              className="p-2.5 sm:p-3 rounded-full glass shadow-soft bg-white/80 relative"
-            >
-              <MessageCircle className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />
-              <div className="absolute top-2.5 right-2.5 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-green-500 rounded-full border border-white" />
-            </button>
-            <button className="p-2.5 sm:p-3 rounded-full glass shadow-soft bg-white/80 relative">
-              <Bell className="w-5 h-5 text-foreground" />
-              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-primary rounded-full" />
-            </button>
-            <button
-              onClick={() => navigate('/profile')}
-              className="p-2.5 sm:p-3 rounded-full glass shadow-soft bg-white/80"
-            >
-              <User className="w-4 h-4 sm:w-5 sm:h-5 text-foreground" />
-            </button>
-          </div>
-        </div>
-      </motion.header>
-
-      {/* Map Layer - Only visible when list is NOT fullscreen */}
-      {!isListFullScreen && (
-        <div className="absolute inset-0 w-full h-full">
-          <RestaurantMap
-            restaurants={filteredRestaurants}
-            isFullScreen={false} // Map is never fullscreen in this new logic
-            onExitFullScreen={() => { }}
-          />
-        </div>
-      )}
-
-      {/* Bottom Sheet Layer - Always rendered, unless map is full screen */}
-      {!isMapFullScreen && (
-        <BottomSheet
-          items={filteredFoodItems}
-          filters={filters}
-          onFilterChange={setFilters}
-          isFullScreen={isListFullScreen}
+    <div className="relative w-full h-[100dvh] overflow-hidden">
+      {/* Map is always rendered, but its visibility is toggled */}
+      <div className={`absolute inset-0 w-full h-full transition-opacity duration-300 ${isMapVisible ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}>
+        <RestaurantMap
+          restaurants={visibleRestaurants}
+          onToggleView={() => setMapVisible(false)}
         />
-      )}
+      </div>
+
+      {/* List View (BottomSheet) is always present but hidden/shown */}
+      <div className={`absolute inset-0 w-full h-full transition-opacity duration-300 ${!isMapVisible ? 'opacity-100 z-20' : 'opacity-0 z-0 pointer-events-none'}`}>
+         <BottomSheet
+            items={filteredDishes}
+            filters={filters}
+            onFilterChange={setFilters}
+            onToggleView={() => setMapVisible(true)}
+            isLoading={isLoading} // Pass loading state down
+            error={error}       // Pass error state down
+        />
+      </div>
     </div>
   );
 };

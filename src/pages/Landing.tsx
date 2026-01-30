@@ -57,7 +57,7 @@ const Landing = () => {
     {
       name: 'Fatima Zubairu',
       role: 'Student',
-      content: 'Authentic flavors at a great price. Taste Explorer is a game-changer for Gombe!',
+      content: 'Authentic flavors at a great price. Fast Eat is a game-changer for Gombe!',
       stars: 5,
     },
   ];
@@ -71,9 +71,9 @@ const Landing = () => {
             {/* Logo */}
             <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
               <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-soft">
-                <ChefHat className="w-6 h-6" />
+                <img src="/logo.svg" alt="Fast Eat Logo" className="w-6 h-6" />
               </div>
-              <span className="font-serif font-bold text-xl tracking-tight hidden sm:block">Taste Explorer</span>
+              <span className="font-serif font-bold text-xl tracking-tight hidden sm:block">Fast Eat</span>
             </div>
 
             {/* Desktop Navigation */}
@@ -194,7 +194,7 @@ const Landing = () => {
               transition={{ duration: 0.8 }}
             >
               <span className="inline-block px-4 py-2 mb-6 text-sm font-medium bg-primary/10 text-primary rounded-full">
-                🍲 Taste the Heart of Gombe
+                🍲 Fast Eat
               </span>
 
               <h1 className="text-5xl md:text-7xl font-serif font-bold text-foreground leading-tight mb-6">
@@ -534,7 +534,7 @@ const Landing = () => {
           </div>
 
           <div className="pt-8 border-t border-white/10 text-center text-gray-500 text-sm">
-            <p>© 2026 Taste Explorer. Empowering Gombe's Home Kitchens.</p>
+            <p>© 2026 Fast Eat. Empowering Gombe's Home Kitchens.</p>
           </div>
         </div>
       </footer>
