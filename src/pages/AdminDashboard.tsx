@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { UserPlus, Truck, ShoppingCart, ChevronDown, Database } from 'lucide-react';
+import { UserPlus, Truck, ShoppingCart, ChevronDown, Database, Loader2 } from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
 
 import { Button } from '@/components/ui/button';
@@ -30,38 +30,38 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const AdminDashboard = () => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [newUserData, setNewUserData] = useState({
     email: '',
     password: '',
-    role: 'chef',
+    full_name: '',
+    role: 'chef' as 'chef' | 'rider',
   });
   const [orders, setOrders] = useState<any[]>([]);
   const [deliveries, setDeliveries] = useState<any[]>([]);
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      const { data, error } = await supabase.from('orders').select('*');
-      if (error) {
-        console.error('Error fetching orders:', error);
-      } else {
-        setOrders(data);
-      }
+    const fetchInitialData = async () => {
+      const ordersPromise = supabase.from('orders').select('*');
+      const deliveriesPromise = supabase.from('deliveries').select('*');
+      const [{ data: ordersData, error: ordersError }, { data: deliveriesData, error: deliveriesError }] = await Promise.all([ordersPromise, deliveriesPromise]);
+
+      if (ordersError) console.error('Error fetching orders:', ordersError);
+      else setOrders(ordersData || []);
+
+      if (deliveriesError) console.error('Error fetching deliveries:', deliveriesError);
+      else setDeliveries(deliveriesData || []);
     };
 
-    const fetchDeliveries = async () => {
-      const { data, error } = await supabase.from('deliveries').select('*');
-      if (error) {
-        console.error('Error fetching deliveries:', error);
-      } else {
-        setDeliveries(data);
-      }
-    };
-
-    fetchOrders();
-    fetchDeliveries();
+    fetchInitialData();
   }, []);
 
   const handleCreateUser = async () => {
+    if (!newUserData.email || !newUserData.password || !newUserData.full_name) {
+        alert('Please fill in all fields.');
+        return;
+    }
+    setIsSubmitting(true);
     // Step 1: Create the user in Supabase Auth
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email: newUserData.email,
@@ -70,86 +70,28 @@ const AdminDashboard = () => {
 
     if (authError) {
       alert('Error creating user: ' + authError.message);
+      setIsSubmitting(false);
       return;
     }
 
     if (authData.user) {
-      // Step 2: Insert the user's role into the profiles table
+      // Step 2: Insert the user's profile with their role and full name
       const { error: profileError } = await supabase.from('profiles').insert([
-        { id: authData.user.id, role: newUserData.role, full_name: newUserData.email },
+        { id: authData.user.id, role: newUserData.role, full_name: newUserData.full_name },
       ]);
 
       if (profileError) {
+        // Attempt to clean up the created auth user if profile creation fails
+        // This is important for preventing orphaned auth users.
+        // Note: This requires admin privileges.
+        await supabase.auth.admin.deleteUser(authData.user.id)
         alert('Error setting user role: ' + profileError.message);
       } else {
-        alert(`User with email ${newUserData.email} and role ${newUserData.role} created!`);
-        setNewUserData({ email: '', password: '', role: 'chef' });
+        alert(`User with email ${newUserData.email} and role ${newUserData.role} created successfully!`);
+        setNewUserData({ email: '', password: '', full_name: '', role: 'chef' });
       }
     }
-  };
-
-  const handleSeedData = async () => {
-    try {
-      alert('Seeding database... This may take a moment.');
-      // 1. Create a Chef user to own the restaurants
-      const chefEmail = `chef-${Date.now()}@example.com`;
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: chefEmail,
-        password: 'password123',
-      });
-
-      if (authError || !authData.user) {
-        throw new Error(`Failed to create chef user: ${authError?.message}`);
-      }
-      const chefId = authData.user.id;
-
-      // 2. Assign the 'chef' role to the new user's profile
-      const { error: profileError } = await supabase.from('profiles').insert({
-        id: chefId,
-        role: 'chef',
-        full_name: 'Sample Chef Owner',
-      });
-
-      if (profileError) {
-        throw new Error(`Failed to create chef profile: ${profileError.message}`);
-      }
-
-      // 3. Create Restaurants
-      const { data: restaurants, error: restaurantError } = await supabase.from('restaurants').insert([
-        { owner_id: chefId, name: 'The Gourmet Kitchen', description: 'Classic American cuisine with a modern twist.', address: '123 Main St, Anytown, USA', phone_number: '555-1234', image_url: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4' },
-        { owner_id: chefId, name: 'Pasta Paradise', description: 'Authentic Italian pasta and pizza.', address: '456 Oak Ave, Anytown, USA', phone_number: '555-5678', image_url: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5' },
-      ]).select();
-
-      if (restaurantError || !restaurants) {
-        throw new Error(`Failed to create restaurants: ${restaurantError?.message}`);
-      }
-
-      const gourmetKitchenId = restaurants.find(r => r.name === 'The Gourmet Kitchen')?.id;
-      const pastaParadiseId = restaurants.find(r => r.name === 'Pasta Paradise')?.id;
-
-      if (!gourmetKitchenId || !pastaParadiseId) {
-          throw new Error('Could not find created restaurant IDs.');
-      }
-
-      // 4. Create Dishes
-      const { error: dishError } = await supabase.from('dishes').insert([
-        { restaurant_id: gourmetKitchenId, name: 'Classic Burger', description: 'A juicy 1/2 pound burger with all the fixings.', price: 15.99, image_url: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd' },
-        { restaurant_id: gourmetKitchenId, name: 'Grilled Salmon', description: 'Fresh Atlantic salmon grilled to perfection.', price: 22.50, image_url: 'https://images.unsplash.com/photo-1519708227418-c8fd9a32b7a2' },
-        { restaurant_id: pastaParadiseId, name: 'Spaghetti Carbonara', description: 'A classic Roman pasta dish.', price: 18.00, image_url: 'https://images.unsplash.com/photo-1588013273468-31508b946d4d' },
-        { restaurant_id: pastaParadiseId, name: 'Margherita Pizza', description: 'Fresh mozzarella, tomatoes, and basil.', price: 16.50, image_url: 'https://images.unsplash.com/photo-1598021680942-8aa5214e3436' },
-      ]);
-
-      if (dishError) {
-        throw new Error(`Failed to create dishes: ${dishError.message}`);
-      }
-
-      alert('Successfully seeded the database with sample data!');
-      // Optionally refresh data on screen
-      // fetchOrders();
-      // fetchDeliveries();
-    } catch (error) {
-        alert(`Seeding failed: ${error instanceof Error ? error.message : "An unknown error occurred"}`);
-    }
+    setIsSubmitting(false);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -171,46 +113,50 @@ const AdminDashboard = () => {
       >
         <header className="mb-8">
           <h1 className="text-4xl font-bold text-gray-800">Admin Dashboard</h1>
-          <p className="text-gray-500">Welcome, talk2icedmist@gmail.com</p>
+          <p className="text-gray-500">System management and overview</p>
         </header>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {/* Create User Card */}
           <motion.div whileHover={{ y: -5 }} className="col-span-1 md:col-span-2 lg:col-span-1">
-            <Card>
+            <Card className="shadow-md hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <UserPlus className="mr-2" />
+                  <UserPlus className="mr-2 text-indigo-600" />
                   Create New User
                 </CardTitle>
                 <CardDescription>Add a new chef or rider to the system.</CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
+                  <Label htmlFor="full_name">Full Name</Label>
+                  <Input id="full_name" name="full_name" type="text" placeholder="e.g., Mariam Abubakar" value={newUserData.full_name} onChange={handleInputChange} />
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input id="email" name="email" type="email" placeholder="user@example.com" value={newUserData.email} onChange={handleInputChange} />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">Temporary Password</Label>
                   <Input id="password" name="password" type="password" value={newUserData.password} onChange={handleInputChange} />
                 </div>
                 <div className="space-y-2">
                   <Label>Role</Label>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="outline" className="w-full justify-between">
-                        {newUserData.role === 'chef' ? 'Chef' : 'Rider'}
-                        <ChevronDown />
+                      <Button variant="outline" className="w-full justify-between capitalize">
+                        {newUserData.role}
+                        <ChevronDown className="w-4 h-4"/>
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-full">
+                    <DropdownMenuContent className="w-[var(--radix-dropdown-menu-trigger-width)]">
                       <DropdownMenuItem onSelect={() => handleRoleChange('chef')}>Chef</DropdownMenuItem>
                       <DropdownMenuItem onSelect={() => handleRoleChange('rider')}>Rider</DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-                <Button onClick={handleCreateUser} className="w-full">
-                  Create User
+                <Button onClick={handleCreateUser} disabled={isSubmitting} className="w-full bg-indigo-600 hover:bg-indigo-700">
+                  {isSubmitting ? <Loader2 className="animate-spin"/> : 'Create User'}
                 </Button>
               </CardContent>
             </Card>
@@ -218,19 +164,19 @@ const AdminDashboard = () => {
 
           {/* Seeding Card */}
           <motion.div whileHover={{ y: -5 }} className="col-span-1">
-            <Card>
+             <Card className="shadow-md hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Database className="mr-2" />
-                  Seed Data
+                  <Database className="mr-2 text-green-600" />
+                  Database Tools
                 </CardTitle>
                 <CardDescription>
-                  Populate the database with sample restaurants and dishes.
+                  Populate the database with sample restaurants and dishes for testing.
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <Button onClick={handleSeedData} className="w-full">
-                  Add Sample Data
+                <Button variant="secondary" className="w-full">
+                  Seed Sample Data
                 </Button>
               </CardContent>
             </Card>
@@ -238,10 +184,10 @@ const AdminDashboard = () => {
 
           {/* Order Tracking Card */}
           <motion.div whileHover={{ y: -5 }} className="md:col-span-2 lg:col-span-3">
-            <Card>
+            <Card className="shadow-md hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <ShoppingCart className="mr-2" />
+                  <ShoppingCart className="mr-2 text-blue-600" />
                   Live Order Tracking
                 </CardTitle>
               </CardHeader>
@@ -258,10 +204,10 @@ const AdminDashboard = () => {
                   <TableBody>
                     {orders.map((order) => (
                       <TableRow key={order.id}>
-                        <TableCell>{order.id}</TableCell>
-                        <TableCell>{order.customer_id}</TableCell>
-                        <TableCell>${order.total_price.toFixed(2)}</TableCell>
-                        <TableCell>{order.status}</TableCell>
+                        <TableCell className="font-mono text-xs">{order.id.substring(0, 8)}...</TableCell>
+                        <TableCell className="font-mono text-xs">{order.customer_id.substring(0, 8)}...</TableCell>
+                        <TableCell>₦{order.total_price.toLocaleString()}</TableCell>
+                        <TableCell><span className="capitalize px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700">{order.status}</span></TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -272,10 +218,10 @@ const AdminDashboard = () => {
           
           {/* Delivery Tracking Card */}
           <motion.div whileHover={{ y: -5 }} className="md:col-span-3">
-            <Card>
+            <Card className="shadow-md hover:shadow-lg transition-shadow">
               <CardHeader>
                 <CardTitle className="flex items-center">
-                  <Truck className="mr-2" />
+                  <Truck className="mr-2 text-orange-600" />
                   Live Delivery Tracking
                 </CardTitle>
               </CardHeader>
@@ -292,10 +238,10 @@ const AdminDashboard = () => {
                   <TableBody>
                     {deliveries.map((delivery) => (
                       <TableRow key={delivery.id}>
-                        <TableCell>{delivery.id}</TableCell>
-                        <TableCell>{delivery.rider_id}</TableCell>
-                        <TableCell>{delivery.order_id}</TableCell>
-                        <TableCell>{delivery.status}</TableCell>
+                        <TableCell className="font-mono text-xs">{delivery.id.substring(0, 8)}...</TableCell>
+                        <TableCell className="font-mono text-xs">{delivery.rider_id.substring(0, 8)}...</TableCell>
+                        <TableCell className="font-mono text-xs">{delivery.order_id.substring(0, 8)}...</TableCell>
+                        <TableCell><span className="capitalize px-2 py-1 text-xs rounded-full bg-gray-100 text-gray-700">{delivery.status}</span></TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

@@ -40,6 +40,10 @@ CREATE TABLE restaurants (
     name text NOT NULL,
     description text,
     address text,
+    location text,
+    prep_time integer,
+    is_accepting_orders boolean DEFAULT true,
+    delivery_range integer,
     phone_number text,
     image_url text,
     created_at timestamptz DEFAULT now()
@@ -53,6 +57,8 @@ CREATE TABLE dishes (
     description text,
     price numeric(10, 2) NOT NULL,
     image_url text,
+    available boolean DEFAULT true,
+    category text,
     created_at timestamptz DEFAULT now()
 );
 

@@ -8,6 +8,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -18,6 +19,7 @@ const Landing = () => {
     damping: 30,
     restDelta: 0.001
   });
+  const [reviews, setReviews] = useState<any[]>([]);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -25,6 +27,28 @@ const Landing = () => {
     };
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const fetchReviews = async () => {
+      const { data, error } = await supabase
+        .from('reviews')
+        .select(`
+          rating,
+          comment,
+          profiles ( full_name )
+        `)
+        .order('created_at', { ascending: false })
+        .limit(3);
+      
+      if (error) {
+        console.error('Error fetching reviews:', error);
+      } else {
+        setReviews(data);
+      }
+    };
+
+    fetchReviews();
   }, []);
 
   const scrollToSection = (id: string) => {
@@ -39,27 +63,6 @@ const Landing = () => {
     { name: 'Journey', id: 'journey' },
     { name: 'Impact', id: 'impact' },
     { name: 'Stories', id: 'stories' },
-  ];
-
-  const feedBacks = [
-    {
-      name: 'Aisha Lawal',
-      role: 'Regular Customer',
-      content: 'The Masa I ordered was just like my grandmother used to make. Authentic and fresh!',
-      stars: 5,
-    },
-    {
-      name: 'Musa Ibrahim',
-      role: 'Food Enthusiast',
-      content: 'I love how I can support local chefs in Gombe directly. The delivery was incredibly fast.',
-      stars: 5,
-    },
-    {
-      name: 'Fatima Zubairu',
-      role: 'Student',
-      content: 'Authentic flavors at a great price. Fast Eat is a game-changer for Gombe!',
-      stars: 5,
-    },
   ];
 
   return (
@@ -444,9 +447,9 @@ const Landing = () => {
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            {feedBacks.map((feedback, index) => (
+            {reviews.map((review, index) => (
               <motion.div
-                key={feedback.name}
+                key={index}
                 initial={{ opacity: 0, x: 30 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
@@ -455,20 +458,20 @@ const Landing = () => {
               >
                 <Quote className="absolute top-6 right-8 w-10 h-10 text-primary/10" />
                 <div className="flex gap-1 mb-4">
-                  {[...Array(feedback.stars)].map((_, i) => (
+                  {[...Array(review.rating)].map((_, i) => (
                     <Star key={i} className="w-4 h-4 fill-primary text-primary" />
                   ))}
                 </div>
                 <p className="text-lg text-foreground mb-6 font-serif italic">
-                  "{feedback.content}"
+                  "{review.comment}"
                 </p>
                 <div className="flex items-center gap-4">
                   <div className="w-12 h-12 rounded-full bg-primary/20 flex items-center justify-center font-bold text-primary">
-                    {feedback.name[0]}
+                    {review.profiles.full_name[0]}
                   </div>
                   <div>
-                    <h4 className="font-bold text-foreground">{feedback.name}</h4>
-                    <p className="text-sm text-muted-foreground">{feedback.role}</p>
+                    <h4 className="font-bold text-foreground">{review.profiles.full_name}</h4>
+                    <p className="text-sm text-muted-foreground">Customer</p>
                   </div>
                 </div>
               </motion.div>
